@@ -1,35 +1,43 @@
 package stepDefinitions;
 
-import com.browserstack.Interacctions.AddProductToCart;
-import com.browserstack.Interacctions.filtrar;
+import com.browserstack.interactions.AddProductToCart;
+import com.browserstack.interactions.FiltrarPorMarca;
 import com.browserstack.questions.TextOfElement;
 import com.browserstack.tasks.CheckoutTask;
 import com.browserstack.tasks.LoginTask;
-import com.browserstack.Interacctions.OpenWebTask;
+import com.browserstack.tasks.OpenWebTask;
+import io.cucumber.java.Before;
+import io.cucumber.java.es.Cuando;
+import io.cucumber.java.es.Dado;
+import io.cucumber.java.es.Entonces;
 import net.serenitybdd.screenplay.actors.OnStage;
-import cucumber.api.java.es.Cuando;
-import cucumber.api.java.es.Dado;
-import cucumber.api.java.es.Entonces;
-import static com.browserstack.userInterfaces.CheckoutPageUI.TXT_CONFIRMATION;
+import net.serenitybdd.screenplay.actors.OnlineCast;
+
+import static com.browserstack.userInterfaces.CheckoutPageUI.LBL_ORDER_CONFIRMATION;
 import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
+import static net.serenitybdd.screenplay.actors.OnStage.setTheStage;
 import static net.serenitybdd.screenplay.actors.OnStage.theActorCalled;
 import static org.hamcrest.Matchers.equalTo;
 
 public class CompraStepDefinitions {
 
-
+    @Before
+    public void configurarEscenario() {
+        setTheStage(new OnlineCast());
+    }
 
     @Dado("que el usuario se encuentra autenticado")
     public void queElUsuarioSeEncuentraAutenticado() {
-        theActorCalled("Tester").wasAbleTo(
+        theActorCalled("Comprador").wasAbleTo(
                 OpenWebTask.openWeb(),
                 LoginTask.login()
         );
     }
+
     @Cuando("el usuario filtra los productos por la marca {string}")
-    public void elUsuarioFiltraLosProductosPorLaMarca(String marca) {
+    public void elUsuarioFiltraLosProductosPorLaMarca(String strMarca) {
         OnStage.theActorInTheSpotlight().attemptsTo(
-                filtrar.filter(marca)
+                FiltrarPorMarca.filter(strMarca)
         );
     }
 
@@ -48,9 +56,9 @@ public class CompraStepDefinitions {
     }
 
     @Entonces("debe ser visible el mensaje de confirmacion {string}")
-    public void debeSerVisibleElMensajeDeConfirmacion(String text) {
+    public void debeSerVisibleElMensajeDeConfirmacion(String strMensajeEsperado) {
         OnStage.theActorInTheSpotlight().should(
-            seeThat(TextOfElement.visible(TXT_CONFIRMATION), equalTo(text))
+                seeThat(TextOfElement.visible(LBL_ORDER_CONFIRMATION), equalTo(strMensajeEsperado))
         );
     }
 }

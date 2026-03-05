@@ -1,7 +1,7 @@
 package com.browserstack.tasks;
 
 import com.browserstack.models.UserData;
-import com.browserstack.utils.LeerExcel;
+import com.browserstack.utils.ExcelReader;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Task;
 import net.serenitybdd.screenplay.actions.Click;
@@ -16,25 +16,25 @@ import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisi
 
 public class CheckoutTask implements Task {
 
-    String route = "src/test/resources/data/Credentials.xlsx";
-    UserData userData = LeerExcel.readData(route);
+    private static final String RUTA_DATOS = "src/test/resources/data/Credentials.xlsx";
 
     @Override
     public <T extends Actor> void performAs(T actor) {
+        UserData userData = ExcelReader.readData(RUTA_DATOS);
         actor.attemptsTo(
                 Click.on(BTN_CHECKOUT),
-                WaitUntil.the(INPUT_FIRST_NAME, isVisible()).forNoMoreThan(10).seconds(),
-                Enter.theValue(userData.getFirstName()).into(INPUT_FIRST_NAME),
-                Enter.theValue(userData.getLastName()).into(INPUT_LAST_NAME),
-                Enter.theValue(userData.getAddress()).into(INPUT_ADDRESS),
-                Enter.theValue(userData.getState()).into(INPUT_STATE),
-                Enter.theValue(userData.getPostalCode()).into(INPUT_POSTAL_CODE),
+                WaitUntil.the(TXT_FIRST_NAME, isVisible()).forNoMoreThan(10).seconds(),
+                Enter.theValue(userData.getFirstName()).into(TXT_FIRST_NAME),
+                Enter.theValue(userData.getLastName()).into(TXT_LAST_NAME),
+                Enter.theValue(userData.getAddress()).into(TXT_ADDRESS),
+                Enter.theValue(userData.getState()).into(TXT_STATE),
+                Enter.theValue(userData.getPostalCode()).into(TXT_POSTAL_CODE),
                 WaitUntil.the(BTN_SUBMIT, isClickable()).forNoMoreThan(10).seconds(),
                 Click.on(BTN_SUBMIT)
-                );
+        );
     }
 
-    public static CheckoutTask checkout(){
+    public static CheckoutTask checkout() {
         return instrumented(CheckoutTask.class);
     }
 }

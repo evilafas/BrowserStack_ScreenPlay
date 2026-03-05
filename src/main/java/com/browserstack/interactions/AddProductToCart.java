@@ -1,4 +1,4 @@
-package com.browserstack.Interacctions;
+package com.browserstack.interactions;
 
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Interaction;
@@ -9,7 +9,6 @@ import static net.serenitybdd.screenplay.Tasks.instrumented;
 
 public class AddProductToCart implements Interaction {
 
-
     @Override
     public <T extends Actor> void performAs(T actor) {
         actor.attemptsTo(
@@ -17,7 +16,7 @@ public class AddProductToCart implements Interaction {
         );
     }
 
-    public static AddProductToCart add(){
+    public static AddProductToCart add() {
         return instrumented(AddProductToCart.class);
     }
 }
