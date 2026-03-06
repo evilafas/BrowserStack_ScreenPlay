@@ -6,25 +6,17 @@ import com.browserstack.questions.TextOfElement;
 import com.browserstack.tasks.CheckoutTask;
 import com.browserstack.tasks.LoginTask;
 import com.browserstack.tasks.OpenWebTask;
-import io.cucumber.java.Before;
 import io.cucumber.java.es.Cuando;
 import io.cucumber.java.es.Dado;
 import io.cucumber.java.es.Entonces;
 import net.serenitybdd.screenplay.actors.OnStage;
-import net.serenitybdd.screenplay.actors.OnlineCast;
 
 import static com.browserstack.userInterfaces.CheckoutPageUI.LBL_ORDER_CONFIRMATION;
 import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
-import static net.serenitybdd.screenplay.actors.OnStage.setTheStage;
 import static net.serenitybdd.screenplay.actors.OnStage.theActorCalled;
 import static org.hamcrest.Matchers.equalTo;
 
 public class CompraStepDefinitions {
-
-    @Before
-    public void configurarEscenario() {
-        setTheStage(new OnlineCast());
-    }
 
     @Dado("que el usuario se encuentra autenticado")
     public void queElUsuarioSeEncuentraAutenticado() {

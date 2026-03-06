@@ -3,16 +3,12 @@ package stepDefinitions;
 import com.browserstack.questions.TextOfElement;
 import com.browserstack.tasks.LoginTask;
 import com.browserstack.tasks.OpenWebTask;
-import io.cucumber.java.Before;
 import io.cucumber.java.es.Cuando;
 import io.cucumber.java.es.Dado;
 import io.cucumber.java.es.Entonces;
-import net.serenitybdd.screenplay.actors.OnStage;
-import net.serenitybdd.screenplay.actors.OnlineCast;
 
 import static com.browserstack.userInterfaces.HomePageUI.TXT_USERNAME;
 import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
-import static net.serenitybdd.screenplay.actors.OnStage.setTheStage;
 import static net.serenitybdd.screenplay.actors.OnStage.theActorCalled;
 import static net.serenitybdd.screenplay.actors.OnStage.theActorInTheSpotlight;
 import static org.hamcrest.Matchers.equalTo;
@@ -20,11 +16,6 @@ import static org.hamcrest.Matchers.equalTo;
 public class LoginStepDefinitions {
 
     private static final String ACTOR = "Usuario";
-
-    @Before
-    public void configurarEscenario() {
-        setTheStage(new OnlineCast());
-    }
 
     @Dado("que el usuario se encuentra en la pagina de BrowserStack")
     public void abrirPagina() {

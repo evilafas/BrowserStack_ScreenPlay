@@ -1,0 +1,45 @@
+services:
+  healenium-db:
+    image: postgres:14-alpine
+    container_name: healenium-db
+    environment:
+      POSTGRES_DB: healenium
+      POSTGRES_USER: healenium_user
+      POSTGRES_PASSWORD: YBMSDb
+    volumes:
+      - ./hlm-postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U healenium_user -d healenium"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  hlm-selector-imitator:
+    image: healenium/hlm-selector-imitator:1.6
+    container_name: hlm-selector-imitator
+    ports:
+      - "8000:8000"
+
+  healenium:
+    image: healenium/hlm-backend:3.4.4
+    container_name: healenium-backend
+    depends_on:
+      healenium-db:
+        condition: service_healthy
+      hlm-selector-imitator:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://healenium-db:5432/healenium
+      SPRING_DATASOURCE_USERNAME: healenium_user
+      SPRING_DATASOURCE_PASSWORD: YBMSDb
+      SERVER_PORT: 7878
+      RECOVERY_TRIES: 1
+      SCORE_CAP: "0.6"
+      HEAL_ENABLED: "true"
+      HLM_IMITATOR_HOST: hlm-selector-imitator
+      HLM_IMITATOR_PORT: 8000
+    ports:
+      - "7878:7878"

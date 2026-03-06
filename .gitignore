@@ -47,3 +47,6 @@ out/
 build/
 target/
 .gradle/
+
+### Healenium Docker volume data ###
+hlm-postgres-data/

@@ -42,6 +42,10 @@ dependencies {
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     implementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
     implementation "io.github.bonigarcia:webdrivermanager:${bonigarcia}"
+    implementation("com.epam.healenium:healenium-web:${healeniumVersion}") {
+        exclude group: 'com.google.inject', module: 'guice'
+    }
+    implementation 'com.google.inject:guice:5.1.0'
 }
 
 test {

@@ -27,6 +27,7 @@ public class LoginTask implements Task {
                 Hit.the(Keys.ENTER).into(INPUT_USERNAME),
                 Enter.theValue(userData.getPassword()).into(INPUT_PASSWORD),
                 Hit.the(Keys.ENTER).into(INPUT_PASSWORD),
+                SimularCambioDOM.ahora(),
                 Click.on(BTN_LOGIN)
         );
     }
