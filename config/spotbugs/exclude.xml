@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter
+        xmlns="https://github.com/spotbugs/filter/3.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0
+            https://raw.githubusercontent.com/spotbugs/spotbugs/master/spotbugs/etc/findbugsfilter.xsd">
+
+    <!--
+        Exclusiones de SpotBugs para BrowserStack ScreenPlay
+        Java 21 · Serenity BDD · Screenplay · Lombok · Cucumber
+    -->
+
+    <!-- ═══════════════════════════════════════════
+         LOMBOK - Código generado automáticamente
+         ═══════════════════════════════════════════ -->
+
+    <!-- Suprimir todos los bugs en clases generadas por Lombok -->
+    <Match>
+        <Class name="~.*\..*$$.*"/>
+    </Match>
+
+    <!-- Campos Lombok: no requieren serialización -->
+    <Match>
+        <Bug pattern="SE_BAD_FIELD"/>
+    </Match>
+
+    <!-- ═══════════════════════════════════════════
+         SERENITY BDD / SCREENPLAY PATTERN
+         ═══════════════════════════════════════════ -->
+
+    <!-- Tasks.instrumented() usa reflexión; SpotBugs puede marcar null returns -->
+    <Match>
+        <Class name="~com\.browserstack\.tasks\..*"/>
+        <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
+    </Match>
+
+    <!-- Los Targets de Screenplay son static final public por diseño -->
+    <Match>
+        <Class name="~com\.browserstack\.userInterfaces\..*"/>
+        <Bug pattern="MS_SHOULD_BE_FINAL"/>
+    </Match>
+
+    <!-- ═══════════════════════════════════════════
+         EXCEPCIONES PERSONALIZADAS
+         ═══════════════════════════════════════════ -->
+
+    <!-- Las excepciones no necesitan serialVersionUID en frameworks de test -->
+    <Match>
+        <Class name="~com\.browserstack\.exceptions\..*"/>
+        <Bug pattern="SE_NO_SERIALVERSIONID"/>
+    </Match>
+
+    <Match>
+        <Class name="~com\.browserstack\.exceptions\..*"/>
+        <Bug pattern="SE_BAD_FIELD_STORE"/>
+    </Match>
+
+    <!-- ═══════════════════════════════════════════
+         HEALENIUM - Interoperabilidad con bibliotecas externas
+         ═══════════════════════════════════════════ -->
+
+    <!-- SelfHealingDriverSource: manejo interno del driver puede parecer nulo -->
+    <Match>
+        <Class name="com.browserstack.utils.SelfHealingDriverSource"/>
+        <Bug pattern="NP_NULL_ON_SOME_PATH"/>
+    </Match>
+
+    <!-- HealeniumConfig: Singleton con inicialización lazy -->
+    <Match>
+        <Class name="com.browserstack.config.HealeniumConfig"/>
+        <Bug pattern="DC_DOUBLECHECK"/>
+    </Match>
+
+    <!-- ═══════════════════════════════════════════
+         EXCEL READER - Apache POI
+         ═══════════════════════════════════════════ -->
+
+    <!-- POI usa recursos que SpotBugs puede marcar como no cerrados -->
+    <Match>
+        <Class name="com.browserstack.utils.ExcelReader"/>
+        <Bug pattern="OBL_UNSATISFIED_OBLIGATION"/>
+    </Match>
+
+    <!-- ═══════════════════════════════════════════
+         CLASES DE TEST
+         ═══════════════════════════════════════════ -->
+
+    <!-- Step Definitions y Runners no necesitan análisis profundo -->
+    <Match>
+        <Class name="~stepDefinitions\..*"/>
+        <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
+    </Match>
+
+    <Match>
+        <Class name="~runners\..*"/>
+    </Match>
+
+    <!-- ═══════════════════════════════════════════
+         PATRONES GLOBALES SEGUROS
+         ═══════════════════════════════════════════ -->
+
+    <!-- Random no requiere ser seguro para pruebas (JavaFaker) -->
+    <Match>
+        <Bug pattern="DMI_RANDOM_USED_ONLY_ONCE"/>
+    </Match>
+
+</FindBugsFilter>

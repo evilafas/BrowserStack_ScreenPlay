@@ -9,10 +9,16 @@ buildscript {
     }
     dependencies {
         classpath "net.serenity-bdd:serenity-gradle-plugin:${gradlePlugin}"
+        classpath "com.github.spotbugs.snom:spotbugs-gradle-plugin:${spotbugsPlugin}"
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:${sonarPlugin}"
     }
 }
 
 apply plugin: 'net.serenity-bdd.serenity-gradle-plugin'
+apply plugin: 'checkstyle'
+apply plugin: 'pmd'
+apply plugin: 'com.github.spotbugs'
+apply plugin: 'org.sonarqube'
 
 repositories {
     mavenLocal()
@@ -46,8 +52,166 @@ dependencies {
         exclude group: 'com.google.inject', module: 'guice'
     }
     implementation 'com.google.inject:guice:5.1.0'
+
+    // SpotBugs annotations (para @SuppressFBWarnings)
+    compileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugsVersion}"
+    testCompileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugsVersion}"
 }
 
+// ═══════════════════════════════════════════════════════════
+// CHECKSTYLE — Estilo de código (Google Style adaptado)
+// ═══════════════════════════════════════════════════════════
+checkstyle {
+    toolVersion = checkstyleVersion
+    configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
+    configDirectory = file("${project.rootDir}/config/checkstyle")
+    maxWarnings = 30      // Umbral inicial; reducir conforme se corrija deuda técnica
+    ignoreFailures = false
+    showViolations = true
+}
+
+checkstyleMain {
+    source = fileTree('src/main/java')
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+checkstyleTest {
+    source = fileTree('src/test/java')
+    ignoreFailures = true   // Más permisivo en código de test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// PMD — Análisis de código fuente (bugs, malas prácticas)
+// ═══════════════════════════════════════════════════════════
+pmd {
+    toolVersion = pmdVersion
+    ruleSetFiles = files("${project.rootDir}/config/pmd/ruleset.xml")
+    ruleSets = []       // Evitar ruleset por defecto: usamos el nuestro
+    ignoreFailures = false
+    consoleOutput = true
+}
+
+pmdMain {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+pmdTest {
+    ignoreFailures = true
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// SPOTBUGS — Detección de patrones de bugs en bytecode
+// ═══════════════════════════════════════════════════════════
+spotbugs {
+    toolVersion = spotbugsVersion
+    excludeFilter = file("${project.rootDir}/config/spotbugs/exclude.xml")
+    ignoreFailures = false
+    jvmArgs = [
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util=ALL-UNNAMED'
+    ]
+}
+
+spotbugsMain {
+    reports {
+        xml {
+            required = true
+            outputLocation = file("${buildDir}/reports/spotbugs/main.xml")
+        }
+        html {
+            required = true
+            outputLocation = file("${buildDir}/reports/spotbugs/main.html")
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
+
+spotbugsTest {
+    ignoreFailures = true
+    reports {
+        xml {
+            required = true
+            outputLocation = file("${buildDir}/reports/spotbugs/test.xml")
+        }
+        html {
+            required = true
+            outputLocation = file("${buildDir}/reports/spotbugs/test.html")
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// SONARQUBE — Plataforma de calidad continua (via Docker)
+// ═══════════════════════════════════════════════════════════
+sonarqube {
+    properties {
+        property "sonar.projectKey",        "browserstack-screenplay"
+        property "sonar.projectName",       "BrowserStack ScreenPlay"
+        property "sonar.projectVersion",    "1.0.0"
+        property "sonar.host.url",          System.getProperty("sonar.host.url",
+                                                System.getenv("SONAR_HOST_URL") ?: "http://localhost:9000")
+        property "sonar.token",             System.getProperty("sonar.token",
+                                                System.getenv("SONAR_TOKEN") ?: "")
+        property "sonar.sources",           "src/main/java"
+        property "sonar.tests",             "src/test/java"
+        property "sonar.java.source",       "21"
+        property "sonar.sourceEncoding",    "UTF-8"
+        property "sonar.java.binaries",     "${buildDir}/classes/java/main"
+        property "sonar.java.test.binaries","${buildDir}/classes/java/test"
+        property "sonar.exclusions",        "**/build/**,**/target/**"
+        property "sonar.coverage.exclusions",
+            "src/test/**,**/runners/**,**/stepDefinitions/**"
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// TAREA: staticAnalysis — ejecuta todas las herramientas
+// ═══════════════════════════════════════════════════════════
+task staticAnalysis {
+    group = 'verification'
+    description = 'Ejecuta Checkstyle + PMD + SpotBugs en el código fuente'
+    dependsOn checkstyleMain, checkstyleTest, pmdMain, pmdTest, spotbugsMain, spotbugsTest
+    doLast {
+        println ""
+        println "════════════════════════════════════════════════════"
+        println " ✅  Análisis estático completado"
+        println "     Reportes en: build/reports/"
+        println "     • Checkstyle : build/reports/checkstyle/"
+        println "     • PMD        : build/reports/pmd/"
+        println "     • SpotBugs   : build/reports/spotbugs/"
+        println "════════════════════════════════════════════════════"
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// TAREA: sonarAnalysis — compila + análisis + SonarQube
+// ═══════════════════════════════════════════════════════════
+task sonarAnalysis {
+    group = 'verification'
+    description = 'Compilar, ejecutar análisis estático y enviar a SonarQube'
+    dependsOn compileJava, compileTestJava, staticAnalysis, sonar
+    doFirst {
+        println "Enviando análisis a SonarQube en: ${sonarqube.properties['sonar.host.url']}"
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+// TESTS
+// ═══════════════════════════════════════════════════════════
 test {
     useJUnit {
         include "**/*"

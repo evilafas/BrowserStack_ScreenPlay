@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Interpretación del Reporte SonarQube — BrowserStack ScreenPlay</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --azul: #0050a0;
+    --azul-c: #0073e6;
+    --verde: #00875a;
+    --verde-c: #e3fcef;
+    --rojo: #c0392b;
+    --rojo-c: #fdecea;
+    --naranja: #d97706;
+    --naranja-c: #fff7e6;
+    --amarillo: #b45309;
+    --amarillo-c: #fffbeb;
+    --gris: #f4f6f9;
+    --borde: #dde3ed;
+    --texto: #1a2332;
+    --suave: #5a6a7e;
+    --critico: #7c1d2f;
+    --critico-c: #fde8ea;
+    --major-c: #fff0e6;
+    --minor-c: #fffde7;
+    --info-c: #e8f0fe;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; color: var(--texto); background: white; font-size: 10.5pt; line-height: 1.6; }
+
+  /* ── PORTADA ── */
+  .portada {
+    background: linear-gradient(150deg, #0a2342 0%, #0050a0 40%, #0073e6 100%);
+    color: white; min-height: 100vh; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; text-align: center;
+    padding: 60px 40px; page-break-after: always;
+  }
+  .portada .label { font-size: 9pt; letter-spacing: 4px; text-transform: uppercase; opacity: .6; margin-bottom: 8px; }
+  .portada h1 { font-size: 30pt; font-weight: 700; line-height: 1.2; margin-bottom: 16px; max-width: 700px; }
+  .portada h1 span { color: #7dd3fc; }
+  .portada .sub { font-size: 13pt; font-weight: 300; opacity: .85; max-width: 560px; margin-bottom: 48px; }
+  .portada .gate-badge {
+    background: rgba(0,200,100,.15); border: 2px solid rgba(0,220,110,.4);
+    border-radius: 50px; padding: 14px 36px; margin-bottom: 48px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .portada .gate-badge .gate-icon { font-size: 28pt; }
+  .portada .gate-badge .gate-text { text-align: left; }
+  .portada .gate-badge .gate-text strong { display: block; font-size: 18pt; font-weight: 700; color: #86efac; }
+  .portada .gate-badge .gate-text span { font-size: 10pt; opacity: .8; }
+  .portada .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; max-width: 680px; width: 100%; }
+  .portada .stat { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); border-radius: 10px; padding: 16px 10px; }
+  .portada .stat .val { font-size: 24pt; font-weight: 700; }
+  .portada .stat .lbl { font-size: 8pt; opacity: .7; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+  .portada .stat.ok .val { color: #86efac; }
+  .portada .stat.warn .val { color: #fcd34d; }
+  .portada .stat.cero .val { color: #86efac; }
+  .portada .meta { margin-top: 40px; font-size: 9pt; opacity: .5; }
+
+  /* ── CONTENIDO ── */
+  .contenido { max-width: 880px; margin: 0 auto; padding: 50px 60px; }
+
+  /* ── SECCIÓN ── */
+  .sec { margin-bottom: 48px; }
+  .sec-header {
+    background: linear-gradient(90deg, var(--azul), var(--azul-c));
+    color: white; padding: 13px 22px; border-radius: 8px; margin-bottom: 22px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .sec-header .num {
+    background: rgba(255,255,255,.2); border-radius: 50%; width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12pt; flex-shrink: 0;
+  }
+  .sec-header h2 { font-size: 14pt; font-weight: 600; }
+  h3 { color: var(--azul); font-size: 12pt; font-weight: 600; margin: 20px 0 10px; padding-bottom: 5px; border-bottom: 2px solid var(--borde); }
+  p { margin-bottom: 9px; }
+
+  /* ── CAJAS ── */
+  .box { border-radius: 8px; padding: 14px 18px; margin: 12px 0; display: flex; gap: 12px; }
+  .box-ok { background: var(--verde-c); border-left: 4px solid var(--verde); }
+  .box-warn { background: var(--naranja-c); border-left: 4px solid var(--naranja); }
+  .box-info { background: var(--info-c); border-left: 4px solid var(--azul-c); }
+  .box-tip { background: #f3e8ff; border-left: 4px solid #7c3aed; }
+  .box-icon { font-size: 15pt; flex-shrink: 0; line-height: 1.3; }
+  .box-body { flex: 1; }
+  .box-body strong { display: block; margin-bottom: 3px; font-size: 10pt; }
+  .box-body p, .box-body li { font-size: 9.5pt; margin-bottom: 3px; }
+
+  /* ── DASHBOARD DE MÉTRICAS ── */
+  .dashboard { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin: 18px 0; }
+  .metric-card {
+    border-radius: 10px; padding: 18px; border: 1px solid var(--borde);
+    background: var(--gris); position: relative; overflow: hidden;
+  }
+  .metric-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+  .metric-card.verde::before { background: var(--verde); }
+  .metric-card.rojo::before { background: var(--rojo); }
+  .metric-card.amarillo::before { background: var(--naranja); }
+  .metric-card.azul::before { background: var(--azul-c); }
+  .metric-card .mc-label { font-size: 8.5pt; color: var(--suave); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .metric-card .mc-value { font-size: 26pt; font-weight: 700; line-height: 1; }
+  .metric-card .mc-value.verde { color: var(--verde); }
+  .metric-card .mc-value.rojo { color: var(--rojo); }
+  .metric-card .mc-value.naranja { color: var(--naranja); }
+  .metric-card .mc-value.azul { color: var(--azul-c); }
+  .metric-card .mc-sub { font-size: 9pt; color: var(--suave); margin-top: 4px; }
+  .metric-card .mc-badge {
+    display: inline-block; font-size: 8pt; font-weight: 600; padding: 2px 8px;
+    border-radius: 10px; margin-top: 6px;
+  }
+  .badge-ok { background: var(--verde-c); color: var(--verde); }
+  .badge-warn { background: var(--naranja-c); color: var(--naranja); }
+  .badge-bad { background: var(--rojo-c); color: var(--rojo); }
+  .badge-neutral { background: var(--info-c); color: var(--azul); }
+
+  /* ── RATINGS ── */
+  .ratings { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin: 16px 0; }
+  .rating-card { border-radius: 8px; padding: 14px; text-align: center; border: 1px solid var(--borde); }
+  .rating-card .r-name { font-size: 9pt; color: var(--suave); margin-bottom: 6px; }
+  .rating-card .r-grade {
+    font-size: 32pt; font-weight: 700; color: var(--verde);
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--verde-c); display: flex; align-items: center;
+    justify-content: center; margin: 4px auto 6px;
+  }
+  .rating-card .r-desc { font-size: 8.5pt; color: var(--suave); }
+
+  /* ── TABLA DE ISSUES ── */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 9.5pt; }
+  th { background: var(--azul); color: white; padding: 9px 12px; text-align: left; font-weight: 600; }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+  tr:nth-child(even) td { background: var(--gris); }
+
+  /* ── SEVERITY BADGES ── */
+  .sev { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 8pt; font-weight: 600; }
+  .sev-CRITICAL { background: var(--critico-c); color: var(--critico); }
+  .sev-MAJOR { background: var(--major-c); color: #92400e; }
+  .sev-MINOR { background: var(--minor-c); color: var(--amarillo); }
+  .sev-INFO { background: var(--info-c); color: var(--azul); }
+
+  /* ── ISSUE CARDS ── */
+  .issue-card {
+    border: 1px solid var(--borde); border-radius: 10px; margin-bottom: 16px;
+    overflow: hidden; page-break-inside: avoid;
+  }
+  .issue-header {
+    padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+    flex-wrap: wrap;
+  }
+  .issue-header.crit { background: var(--critico-c); border-left: 4px solid var(--critico); }
+  .issue-header.major { background: var(--major-c); border-left: 4px solid #f97316; }
+  .issue-header.minor { background: var(--minor-c); border-left: 4px solid #d97706; }
+  .issue-header.info { background: var(--info-c); border-left: 4px solid var(--azul-c); }
+  .issue-rule { font-family: 'JetBrains Mono', monospace; font-size: 8.5pt; color: var(--suave); }
+  .issue-title { font-weight: 600; font-size: 10pt; flex: 1; }
+  .issue-body { padding: 14px 16px; }
+  .issue-file { font-family: 'JetBrains Mono', monospace; font-size: 8.5pt; color: var(--azul); margin-bottom: 6px; }
+  .issue-msg { font-size: 9.5pt; margin-bottom: 8px; }
+  .issue-fix { background: #f0fdf4; border-radius: 6px; padding: 8px 12px; font-size: 9.5pt; border-left: 3px solid var(--verde); }
+  .issue-fix strong { color: var(--verde); }
+  .issue-meta { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; }
+  .issue-meta span { font-size: 8.5pt; color: var(--suave); }
+  code { background: #eef2f7; color: var(--azul); padding: 1px 5px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 8.5pt; }
+  pre { background: #1e2a3a; color: #e2e8f0; border-radius: 8px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 8.5pt; line-height: 1.5; margin: 8px 0; overflow-x: auto; }
+  .kw { color: #7dd3fc; }
+  .cm { color: #94a3b8; font-style: italic; }
+  .st { color: #86efac; }
+
+  /* ── EFFORT CHART ── */
+  .effort-bar { margin: 8px 0; }
+  .effort-bar .eb-label { font-size: 9pt; color: var(--suave); margin-bottom: 3px; display: flex; justify-content: space-between; }
+  .effort-bar .eb-track { background: var(--borde); border-radius: 4px; height: 10px; overflow: hidden; }
+  .effort-bar .eb-fill { height: 100%; border-radius: 4px; transition: width .3s; }
+  .fill-crit { background: var(--critico); }
+  .fill-major { background: #f97316; }
+  .fill-minor { background: #d97706; }
+  .fill-info { background: var(--azul-c); }
+
+  /* ── PLAN DE ACCIÓN ── */
+  .action-steps { counter-reset: action; list-style: none; padding: 0; margin: 14px 0; }
+  .action-steps li { counter-increment: action; display: flex; gap: 14px; margin-bottom: 18px; }
+  .action-steps li::before {
+    content: counter(action);
+    background: var(--azul); color: white; min-width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11pt; flex-shrink: 0;
+  }
+  .action-steps li > div { flex: 1; }
+  .action-steps li strong { display: block; color: var(--azul); font-size: 10.5pt; margin-bottom: 4px; }
+
+  /* ── GLOSARIO ── */
+  .glosario dt { font-weight: 600; color: var(--azul); margin-top: 10px; }
+  .glosario dd { margin-left: 16px; font-size: 9.5pt; color: var(--suave); margin-bottom: 4px; }
+
+  hr { border: none; border-top: 1px solid var(--borde); margin: 28px 0; }
+  ul, ol { padding-left: 22px; margin: 8px 0; }
+  li { margin-bottom: 4px; font-size: 9.5pt; }
+  .pie { margin-top: 50px; border-top: 2px solid var(--borde); padding-top: 16px; text-align: center; color: var(--suave); font-size: 8.5pt; }
+
+  @media print {
+    body { font-size: 9.5pt; }
+    .portada { min-height: auto; padding: 40px; }
+    .contenido { padding: 30px 40px; }
+    .issue-card, table, .dashboard, .ratings { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════ PORTADA ════════════════════ -->
+<div class="portada">
+  <div class="label">Gobierno de Automatización Telefónica</div>
+  <h1>Interpretación del Reporte<br><span>SonarQube</span></h1>
+  <p class="sub">Análisis de calidad del proyecto BrowserStack ScreenPlay — Resultados reales del análisis ejecutado el 18 de marzo de 2026</p>
+
+  <div class="gate-badge">
+    <div class="gate-icon">✅</div>
+    <div class="gate-text">
+      <strong>QUALITY GATE: PASSED</strong>
+      <span>El proyecto cumple con el umbral mínimo de calidad configurado</span>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat cero">
+      <div class="val">0</div>
+      <div class="lbl">Bugs</div>
+    </div>
+    <div class="stat cero">
+      <div class="val">0</div>
+      <div class="lbl">Vulnerabilidades</div>
+    </div>
+    <div class="stat warn">
+      <div class="val">23</div>
+      <div class="lbl">Code Smells</div>
+    </div>
+    <div class="stat cero">
+      <div class="val">0%</div>
+      <div class="lbl">Duplicación</div>
+    </div>
+  </div>
+
+  <div class="meta">Análisis: 18 Mar 2026 01:40 UTC · Commit: 3f2c6b8 · SonarQube 10.4.1 · 911 líneas de código</div>
+</div>
+
+<!-- ════════════════════ CONTENIDO ════════════════════ -->
+<div class="contenido">
+
+  <!-- ══ SECCIÓN 1: QUÉ ES EL REPORTE ══ -->
+  <div class="sec">
+    <div class="sec-header"><div class="num">1</div><h2>¿Qué es este reporte y cómo leerlo?</h2></div>
+
+    <p>SonarQube analiza automáticamente el código fuente y produce un reporte de calidad estructurado en cuatro dimensiones principales. Este documento explica qué significa cada resultado y qué acción tomar.</p>
+
+    <div class="box box-info">
+      <div class="box-icon">💡</div>
+      <div class="box-body">
+        <strong>El análisis examina 911 líneas de código Java en el proyecto</strong>
+        <p>Las fechas de creación de los issues revelan cuánto tiempo lleva existiendo cada problema. Algunos vienen desde <strong>diciembre de 2025</strong> (código original), otros surgieron en <strong>marzo de 2026</strong> con la integración de Healenium.</p>
+      </div>
+    </div>
+
+    <h3>Las 4 dimensiones que mide SonarQube</h3>
+    <table>
+      <tr><th>Dimensión</th><th>¿Qué detecta?</th><th>Resultado</th></tr>
+      <tr><td><strong>Fiabilidad</strong></td><td>Bugs — código que probablemente falla en ejecución</td><td><span class="badge-ok">✅ Rating A — 0 bugs</span></td></tr>
+      <tr><td><strong>Seguridad</strong></td><td>Vulnerabilidades que podrían ser explotadas</td><td><span class="badge-ok">✅ Rating A — 0 vulnerabilidades</span></td></tr>
+      <tr><td><strong>Mantenibilidad</strong></td><td>Code Smells — código difícil de mantener o entender</td><td><span class="badge-warn">⚠️ Rating A — 23 smells (0.5% deuda)</span></td></tr>
+      <tr><td><strong>Seguridad revisada</strong></td><td>Security Hotspots — código que merece revisión manual</td><td><span class="badge-ok">✅ 0 hotspots</span></td></tr>
+    </table>
+  </div>
+
+  <!-- ══ SECCIÓN 2: DASHBOARD DE MÉTRICAS ══ -->
+  <div class="sec">
+    <div class="sec-header"><div class="num">2</div><h2>Dashboard de Métricas — Explicación Detallada</h2></div>
+
+    <div class="dashboard">
+      <div class="metric-card verde">
+        <div class="mc-label">Bugs</div>
+        <div class="mc-value verde">0</div>
+        <div class="mc-sub">Errores en tiempo de ejecución</div>
+        <div class="mc-badge badge-ok">✅ Excelente</div>
+      </div>
+      <div class="metric-card verde">
+        <div class="mc-label">Vulnerabilidades</div>
+        <div class="mc-value verde">0</div>
+        <div class="mc-sub">Brechas de seguridad explotables</div>
+        <div class="mc-badge badge-ok">✅ Excelente</div>
+      </div>
+      <div class="metric-card amarillo">
+        <div class="mc-label">Code Smells</div>
+        <div class="mc-value naranja">23</div>
+        <div class="mc-sub">Problemas de mantenibilidad</div>
+        <div class="mc-badge badge-warn">⚠️ Deuda técnica</div>
+      </div>
+      <div class="metric-card verde">
+        <div class="mc-label">Security Hotspots</div>
+        <div class="mc-value verde">0</div>
+        <div class="mc-sub">Puntos de revisión de seguridad</div>
+        <div class="mc-badge badge-ok">✅ Sin revisiones pendientes</div>
+      </div>
+      <div class="metric-card verde">
+        <div class="mc-label">Duplicación de código</div>
+        <div class="mc-value verde">0.0%</div>
+        <div class="mc-sub">Líneas duplicadas en el proyecto</div>
+        <div class="mc-badge badge-ok">✅ Sin duplicación</div>
+      </div>
+      <div class="metric-card amarillo">
+        <div class="mc-label">Cobertura de tests</div>
+        <div class="mc-value naranja">0.0%</div>
+        <div class="mc-sub">Líneas cubiertas por unit tests</div>
+        <div class="mc-badge badge-warn">⚠️ JaCoCo no configurado</div>
+      </div>
+      <div class="metric-card verde">
+        <div class="mc-label">Deuda técnica</div>
+        <div class="mc-value verde">0.5%</div>
+        <div class="mc-sub">137 minutos de trabajo estimado</div>
+        <div class="mc-badge badge-ok">✅ Muy baja</div>
+      </div>
+      <div class="metric-card azul">
+        <div class="mc-label">Líneas de código</div>
+        <div class="mc-value azul">911</div>
+        <div class="mc-sub">NCLOC — Non-commented lines</div>
+        <div class="mc-badge badge-neutral">📏 Proyecto pequeño</div>
+      </div>
+      <div class="metric-card verde">
+        <div class="mc-label">Quality Gate</div>
+        <div class="mc-value verde" style="font-size:18pt;">PASSED</div>
+        <div class="mc-sub">Estado global del proyecto</div>
+        <div class="mc-badge badge-ok">✅ Aprobado</div>
+      </div>
+    </div>
+
+    <h3>Ratings A–E explicados</h3>
+    <p>SonarQube usa una escala de <strong>A a E</strong> donde A es el mejor estado posible. El proyecto obtiene A en todas las dimensiones medidas:</p>
+    <div class="ratings">
+      <div class="rating-card">
+        <div class="r-name">Fiabilidad</div>
+        <div class="r-grade">A</div>
+        <div class="r-desc">0 bugs detectados. El código de automatización no introduce fallos de ejecución.</div>
+      </div>
+      <div class="rating-card">
+        <div class="r-name">Seguridad</div>
+        <div class="r-grade">A</div>
+        <div class="r-desc">0 vulnerabilidades. No hay brechas de seguridad explotables en el código.</div>
+      </div>
+      <div class="rating-card">
+        <div class="r-name">Mantenibilidad</div>
+        <div class="r-grade">A</div>
+        <div class="r-desc">0.5% de deuda técnica. La deuda técnica es inferior al 5% (umbral para rating A).</div>
+      </div>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-icon">⚠️</div>
+      <div class="box-body">
+        <strong>¿Por qué la cobertura es 0.0%?</strong>
+        <p>Esta métrica <em>no significa que los tests no funcionen</em>. Significa que JaCoCo (el plugin de cobertura de Java) no está configurado en el proyecto. Serenity BDD genera sus propios reportes HTML pero no produce el formato XML que SonarQube requiere para mostrar cobertura. Esto es un gap de configuración, no un problema de calidad del código.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECCIÓN 3: ANÁLISIS DE CODE SMELLS ══ -->
+  <div class="sec">
+    <div class="sec-header"><div class="num">3</div><h2>Análisis Detallado de los 23 Code Smells</h2></div>
+
+    <p>Un <strong>code smell</strong> no es un bug — el código funciona — pero indica que hay algo que dificulta su lectura, mantenimiento o extensión futura. SonarQube encontró 23 en total, distribuidos por severidad así:</p>
+
+    <table>
+      <tr><th>Severidad</th><th>Cantidad</th><th>Esfuerzo total</th><th>¿Qué implica?</th></tr>
+      <tr><td><span class="sev sev-CRITICAL">CRITICAL</span></td><td>7</td><td>54 min</td><td>Deberían corregirse pronto. Afectan mantenibilidad de forma notable.</td></tr>
+      <tr><td><span class="sev sev-MAJOR">MAJOR</span></td><td>8</td><td>40 min</td><td>Importantes. Indican diseño mejorable en clases de utilidad.</td></tr>
+      <tr><td><span class="sev sev-MINOR">MINOR</span></td><td>6</td><td>43 min</td><td>Convenciones de naming y pequeñas mejoras de estilo.</td></tr>
+      <tr><td><span class="sev sev-INFO">INFO</span></td><td>2</td><td>0 min</td><td>Informativo. Sin acción obligatoria (Singleton y TODO).</td></tr>
+    </table>
+
+    <h3>Esfuerzo estimado de corrección por archivo</h3>
+    <div class="effort-bar"><div class="eb-label"><span>HealingQualityGate.java</span><span>26 min</span></div><div class="eb-track"><div class="eb-fill fill-crit" style="width:19%"></div></div></div>
+    <div class="effort-bar"><div class="eb-label"><span>HealeniumSerenityListener.java</span><span>25 min</span></div><div class="eb-track"><div class="eb-fill fill-crit" style="width:18.2%"></div></div></div>
+    <div class="effort-bar"><div class="eb-label"><span>HealeniumLogger.java</span><span>21 min</span></div><div class="eb-track"><div class="eb-fill fill-crit" style="width:15.3%"></div></div></div>
+    <div class="effort-bar"><div class="eb-label"><span>CheckoutPageUI.java</span><span>15 min</span></div><div class="eb-track"><div class="eb-fill fill-major" style="width:10.9%"></div></div></div>
+    <div class="effort-bar"><div class="eb-label"><span>HomePageUI.java</span><span>15 min</span></div><div class="eb-track"><div class="eb-fill fill-major" style="width:10.9%"></div></div></div>
+    <div class="effort-bar"><div class="eb-label"><span>LoginPageUI.java</span><span>15 min</span></div><div class="eb-track"><div class="eb-fill fill-major" style="width:10.9%"></div></div></div>
+    <div class="effort-bar"><div class="eb-label"><span>HealeniumHealthCheck.java</span><span>8 min</span></div><div class="eb-track"><div class="eb-fill fill-crit" style="width:5.8%"></div></div></div>
+    <div class="effort-bar"><div class="eb-label"><span>ExcelReader.java</span><span>5 min</span></div><div class="eb-track"><div class="eb-fill fill-major" style="width:3.6%"></div></div></div>
+    <div class="effort-bar"><div class="eb-label"><span>HealeniumTestListener.java</span><span>5 min</span></div><div class="eb-track"><div class="eb-fill fill-major" style="width:3.6%"></div></div></div>
+    <div class="effort-bar"><div class="eb-label"><span>FiltrarPorMarca.java + HealeniumConfig.java</span><span>2 min</span></div><div class="eb-track"><div class="eb-fill fill-minor" style="width:1.5%"></div></div></div>
+    <div style="text-align:right; font-size:9pt; color:var(--suave); margin-top:4px;"><strong>Total: 137 minutos ≈ 2 horas 17 minutos</strong></div>
+
+    <hr>
+
+    <!-- ── GRUPO 1: LITERALS DUPLICADOS ── -->
+    <h3>Grupo 1 — Literales de cadena duplicados <span class="sev sev-CRITICAL">CRITICAL · java:S1192</span></h3>
+    <p>Regla: <strong>"String literals should not be duplicated"</strong>. Cuando el mismo texto aparece 3 o más veces en el código, SonarQube exige extraerlo a una constante. Así, si el texto cambia solo hay que modificarlo en un lugar.</p>
+
+    <div class="issue-card">
+      <div class="issue-header crit">
+        <span class="sev sev-CRITICAL">CRITICAL</span>
+        <div class="issue-title">HealeniumHealthCheck.java — Separador decorativo duplicado</div>
+        <span class="issue-rule">java:S1192 · 8 min</span>
+      </div>
+      <div class="issue-body">
+        <div class="issue-file">📄 src/main/java/com/browserstack/config/HealeniumHealthCheck.java · líneas 128, 130, 154</div>
+        <div class="issue-msg">El texto <code>"════════════════════..."</code> aparece 3 veces. SonarQube exige una constante.</div>
+        <div class="issue-fix"><strong>✅ Corrección:</strong> Declarar <code>private static final String SEPARATOR = "════...════";</code> y reemplazar los 3 usos por la constante.</div>
+        <div class="issue-meta"><span>⏱ Esfuerzo: 8 min</span><span>📅 Desde: 06 Mar 2026</span></div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header crit">
+        <span class="sev sev-CRITICAL">CRITICAL</span>
+        <div class="issue-title">HealeniumLogger.java — Bordes de caja duplicados (x2 smells)</div>
+        <span class="issue-rule">java:S1192 · 16 min</span>
+      </div>
+      <div class="issue-body">
+        <div class="issue-file">📄 src/main/java/com/browserstack/config/HealeniumLogger.java · líneas 58–78</div>
+        <div class="issue-msg">Dos strings decorativos aparecen 3 veces cada uno: <code>"╔════...╗"</code> y <code>"╚════...╝"</code>. Se generan 2 issues separados.</div>
+        <div class="issue-fix"><strong>✅ Corrección:</strong>
+<pre><span class="kw">private static final</span> String TOP_BORDER = <span class="st">"╔════════════════════════════════════╗"</span>;
+<span class="kw">private static final</span> String BOT_BORDER = <span class="st">"╚════════════════════════════════════╝"</span>;</pre>
+        </div>
+        <div class="issue-meta"><span>⏱ Esfuerzo: 16 min (8 min × 2)</span><span>📅 Desde: 06 Mar 2026</span></div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header crit">
+        <span class="sev sev-CRITICAL">CRITICAL</span>
+        <div class="issue-title">HealingQualityGate.java — Emojis de estado y formato duplicados (x3 smells)</div>
+        <span class="issue-rule">java:S1192 · 26 min</span>
+      </div>
+      <div class="issue-body">
+        <div class="issue-file">📄 src/main/java/com/browserstack/config/HealingQualityGate.java · líneas 70–133</div>
+        <div class="issue-msg">Tres strings repetidos: <code>"✓ PASS"</code> (x3), <code>"✗ FAIL"</code> (x3) y el formato <code>"%-18d"</code> (x4).</div>
+        <div class="issue-fix"><strong>✅ Corrección:</strong>
+<pre><span class="kw">private static final</span> String PASS_LABEL   = <span class="st">"✓ PASS"</span>;
+<span class="kw">private static final</span> String FAIL_LABEL   = <span class="st">"✗ FAIL"</span>;
+<span class="kw">private static final</span> String FMT_INT_18   = <span class="st">"%-18d"</span>;</pre>
+        </div>
+        <div class="issue-meta"><span>⏱ Esfuerzo: 26 min</span><span>📅 Desde: 06 Mar 2026</span></div>
+      </div>
+    </div>
+
+    <!-- ── GRUPO 2: MÉTODOS VACÍOS ── -->
+    <h3>Grupo 2 — Métodos vacíos sin explicación <span class="sev sev-CRITICAL">CRITICAL · java:S1186</span></h3>
+    <p>Regla: <strong>"Methods should not be empty"</strong>. Un método vacío genera dudas: ¿es intencional? ¿es un bug? ¿se olvidó implementar? SonarQube exige al menos un comentario.</p>
+
+    <div class="issue-card">
+      <div class="issue-header crit">
+        <span class="sev sev-CRITICAL">CRITICAL</span>
+        <div class="issue-title">HealeniumSerenityListener.java — 2 métodos de interfaz no implementados</div>
+        <span class="issue-rule">java:S1186 · 10 min</span>
+      </div>
+      <div class="issue-body">
+        <div class="issue-file">📄 src/main/java/com/browserstack/listeners/HealeniumSerenityListener.java · líneas 44 y 53</div>
+        <div class="issue-msg">Dos métodos del listener (<code>testStarted</code> / <code>testFinished</code>) están vacíos porque la interfaz los exige pero no se necesita implementación.</div>
+        <div class="issue-fix"><strong>✅ Corrección:</strong> Añadir un comentario explicativo dentro del cuerpo (SonarQube tiene Quick Fix para esto):
+<pre><span class="cm">// No se requiere acción al iniciar/finalizar el test en este listener</span></pre>
+        </div>
+        <div class="issue-meta"><span>⏱ Esfuerzo: 10 min</span><span>🔧 Quick Fix disponible en SonarQube</span></div>
+      </div>
+    </div>
+
+    <!-- ── GRUPO 3: CONSTRUCTORES ── -->
+    <h3>Grupo 3 — Clases de utilidad sin constructor privado <span class="sev sev-MAJOR">MAJOR · java:S1118</span></h3>
+    <p>Regla: <strong>"Utility classes should not have public constructors"</strong>. Las clases con solo métodos/campos estáticos (Page Objects de Screenplay, helpers) no deberían poder instanciarse. Un constructor privado previene el uso accidental con <code>new</code>.</p>
+
+    <div class="issue-card">
+      <div class="issue-header major">
+        <span class="sev sev-MAJOR">MAJOR</span>
+        <div class="issue-title">5 clases afectadas: LoginPageUI, HomePageUI, CheckoutPageUI, ExcelReader, HealeniumLogger</div>
+        <span class="issue-rule">java:S1118 · 25 min</span>
+      </div>
+      <div class="issue-body">
+        <div class="issue-msg">Estas clases tienen solo miembros estáticos pero Java genera automáticamente un constructor público por defecto, lo que permite hacer <code>new LoginPageUI()</code> aunque no tenga sentido.</div>
+        <div class="issue-fix"><strong>✅ Corrección (igual para todas):</strong> Añadir al cuerpo de la clase:
+<pre><span class="cm">/** Constructor privado — clase de utilidad estática */</span>
+<span class="kw">private</span> <span class="fn">LoginPageUI</span>() {
+    <span class="cm">// Clase de utilidad — no instanciar</span>
+}</pre>
+        </div>
+        <div class="issue-meta"><span>⏱ Esfuerzo: 5 min × 5 clases = 25 min</span><span>📅 LoginPageUI/HomePageUI/CheckoutPageUI desde Dic 2025</span></div>
+      </div>
+    </div>
+
+    <!-- ── GRUPO 4: PARÁMETROS SIN USO ── -->
+    <h3>Grupo 4 — Parámetros de método no utilizados <span class="sev sev-MAJOR">MAJOR · java:S1172</span></h3>
+    <p>Regla: <strong>"Unused method parameters should be removed"</strong>. Un parámetro declarado pero nunca leído dentro del método confunde: ¿se olvidó usarlo? ¿era necesario?</p>
+
+    <div class="issue-card">
+      <div class="issue-header major">
+        <span class="sev sev-MAJOR">MAJOR</span>
+        <div class="issue-title">HealeniumSerenityListener.java:85 — healedElement, originalLocator, healedLocator</div>
+        <span class="issue-rule">java:S1172 · 5 min · Quick Fix</span>
+      </div>
+      <div class="issue-body">
+        <div class="issue-file">📄 HealeniumSerenityListener.java · línea 85 · también línea 93 (locator)</div>
+        <div class="issue-msg">El método del listener de Healenium recibe los parámetros del evento de autocuración pero no los utiliza en el cuerpo.</div>
+        <div class="issue-fix"><strong>✅ Corrección:</strong> Prefijar con <code>@SuppressWarnings("unused")</code> si la firma viene forzada por la interfaz, o eliminar los parámetros si no están en la firma de la interfaz. SonarQube ofrece Quick Fix.</div>
+        <div class="issue-meta"><span>⏱ Esfuerzo: 15 min total (3 issues)</span><span>🔧 Quick Fix disponible</span></div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header major">
+        <span class="sev sev-MAJOR">MAJOR</span>
+        <div class="issue-title">HealeniumTestListener.java:56 — healedElement sin uso</div>
+        <span class="issue-rule">java:S1172 · 5 min · Quick Fix</span>
+      </div>
+      <div class="issue-body">
+        <div class="issue-file">📄 HealeniumTestListener.java · línea 56</div>
+        <div class="issue-fix"><strong>✅ Corrección:</strong> Mismo patrón: prefixar el parámetro con <code>@SuppressWarnings("unused")</code> o eliminar si la firma lo permite.</div>
+      </div>
+    </div>
+
+    <!-- ── GRUPO 5: NAMING ── -->
+    <h3>Grupo 5 — Convenciones de nomenclatura <span class="sev sev-MINOR">MINOR</span></h3>
+
+    <div class="issue-card">
+      <div class="issue-header minor">
+        <span class="sev sev-MINOR">MINOR</span>
+        <div class="issue-title">FiltrarPorMarca.java:21 — Variable local OPC_MARCA en UPPER_SNAKE_CASE</div>
+        <span class="issue-rule">java:S117 · 2 min</span>
+      </div>
+      <div class="issue-body">
+        <div class="issue-file">📄 FiltrarPorMarca.java · línea 21</div>
+        <div class="issue-msg"><code>OPC_MARCA</code> usa UPPER_SNAKE_CASE (convención de constantes). Las <em>variables locales</em> deben ser camelCase: <code>opcMarca</code>.</div>
+        <div class="issue-fix"><strong>✅ Corrección:</strong> Renombrar a <code>opcMarca</code> o convertirla en constante de clase con <code>private static final</code>.</div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header minor">
+        <span class="sev sev-MINOR">MINOR</span>
+        <div class="issue-title">userInterfaces/*.java — Nombre de paquete con mayúscula (x3 archivos)</div>
+        <span class="issue-rule">java:S120 · 30 min</span>
+      </div>
+      <div class="issue-body">
+        <div class="issue-file">📄 CheckoutPageUI.java · HomePageUI.java · LoginPageUI.java · línea 1</div>
+        <div class="issue-msg">El paquete <code>com.browserstack.userInterfaces</code> tiene una <code>I</code> mayúscula. Java estándar exige paquetes completamente en minúsculas: <code>userinterfaces</code>.</div>
+        <div class="issue-fix"><strong>✅ Corrección (con impacto):</strong> Renombrar el paquete a <code>userinterfaces</code> y actualizar todos los imports del proyecto. Es un refactoring de IDE (IntelliJ: Refactor → Rename Package). El esfuerzo estimado es 10 min × 3 archivos = 30 min.</div>
+        <div class="issue-meta"><span>📅 Existe desde: 12 Dic 2025 (código original)</span><span>👤 Autor original: andres.altamiranda@sqasa.co</span></div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header minor">
+        <span class="sev sev-MINOR">MINOR</span>
+        <div class="issue-title">HealeniumSerenityListener.java:71 — Boolean boxeado en expresión booleana</div>
+        <span class="issue-rule">java:S5411 · 5 min · Quick Fix</span>
+      </div>
+      <div class="issue-body">
+        <div class="issue-msg">Uso de <code>Boolean</code> (objeto) en lugar del primitivo <code>boolean</code> en una expresión. Podría causar NullPointerException si el valor es <code>null</code>.</div>
+        <div class="issue-fix"><strong>✅ Corrección:</strong> Cambiar <code>Boolean.TRUE.equals(valor)</code> o añadir null-check. Quick Fix disponible en SonarQube.</div>
+      </div>
+    </div>
+
+    <!-- ── GRUPO 6: INFO ── -->
+    <h3>Grupo 6 — Informativo (no requieren acción inmediata) <span class="sev sev-INFO">INFO</span></h3>
+
+    <div class="issue-card">
+      <div class="issue-header info">
+        <span class="sev sev-INFO">INFO</span>
+        <div class="issue-title">HealeniumConfig.java:19 — Patrón Singleton detectado</div>
+        <span class="issue-rule">java:S6548 · 0 min</span>
+      </div>
+      <div class="issue-body">
+        <div class="issue-msg">SonarQube informa que se detectó el patrón Singleton. Esta regla está en estado <strong>BETA</strong> y es solo informativa.</div>
+        <div class="issue-fix"><strong>✅ Acción:</strong> Ninguna. El Singleton es intencional en <code>HealeniumConfig</code> para mantener una única instancia de configuración. Se puede marcar como "Won't Fix" en SonarQube.</div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-header info">
+        <span class="sev sev-INFO">INFO</span>
+        <div class="issue-title">HealeniumHealthCheck.java:32 — Comentario TODO pendiente</div>
+        <span class="issue-rule">java:S1135 · 0 min</span>
+      </div>
+      <div class="issue-body">
+        <div class="issue-msg">Existe un comentario <code>// TODO</code> en la línea 32. SonarQube rastrea los TODOs para que no queden olvidados.</div>
+        <div class="issue-fix"><strong>✅ Acción:</strong> Revisar el TODO, implementar lo pendiente o eliminar el comentario si ya no aplica.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECCIÓN 4: AUTORES Y ANTIGÜEDAD ══ -->
+  <div class="sec">
+    <div class="sec-header"><div class="num">4</div><h2>Autores y Antigüedad de la Deuda</h2></div>
+
+    <p>SonarQube registra qué commit introdujo cada issue. Esto permite identificar responsables y priorizar según cuánto tiempo lleva el problema:</p>
+
+    <table>
+      <tr><th>Autor</th><th>Issues</th><th>Archivos</th><th>Desde</th><th>Contexto</th></tr>
+      <tr>
+        <td><code>andres.altamiranda@sqasa.co</code></td>
+        <td>6</td>
+        <td>LoginPageUI, HomePageUI, CheckoutPageUI</td>
+        <td>12 Dic 2025</td>
+        <td>Código base original del proyecto — deuda técnica heredada</td>
+      </tr>
+      <tr>
+        <td><code>evilafas99@gmail.com</code></td>
+        <td>17</td>
+        <td>Healenium config, listeners, interactions</td>
+        <td>05–06 Mar 2026</td>
+        <td>Integración de Healenium — deuda técnica reciente</td>
+      </tr>
+    </table>
+
+    <div class="box box-info">
+      <div class="box-icon">📊</div>
+      <div class="box-body">
+        <strong>Interpretación de la antigüedad</strong>
+        <p>Los 6 issues de los Page Objects llevan <strong>más de 3 meses</strong> en el código sin corregirse. Son candidatos prioritarios por su antigüedad aunque su severidad sea MINOR/MAJOR. Los 17 issues de Healenium son recientes (2 semanas) y representan deuda técnica introducida durante la integración.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECCIÓN 5: QUÉ NO MIDE SONARQUBE ══ -->
+  <div class="sec">
+    <div class="sec-header"><div class="num">5</div><h2>Lo que SonarQube NO Mide en este Proyecto</h2></div>
+
+    <table>
+      <tr><th>Métrica</th><th>Estado</th><th>Motivo</th><th>Solución</th></tr>
+      <tr>
+        <td><strong>Cobertura de código</strong></td>
+        <td><span class="badge-warn">0.0%</span></td>
+        <td>JaCoCo no está configurado en build.gradle</td>
+        <td>Añadir plugin JaCoCo y configurar generación de XML</td>
+      </tr>
+      <tr>
+        <td><strong>Cobertura de ramas</strong></td>
+        <td><span class="badge-warn">N/A</span></td>
+        <td>Depende de JaCoCo</td>
+        <td>Mismo que cobertura de código</td>
+      </tr>
+      <tr>
+        <td><strong>Tests unitarios</strong></td>
+        <td><span class="badge-warn">N/A</span></td>
+        <td>Serenity no genera reportes JUnit XML compatibles con Sonar por defecto</td>
+        <td>Configurar <code>sonar.junit.reportPaths</code></td>
+      </tr>
+      <tr>
+        <td><strong>Complejidad cognitiva</strong></td>
+        <td><span class="badge-ok">Medida</span></td>
+        <td>SonarQube sí la calcula pero no aparece en issues porque está dentro del umbral</td>
+        <td>Sin acción necesaria</td>
+      </tr>
+    </table>
+
+    <div class="box box-tip">
+      <div class="box-icon">💜</div>
+      <div class="box-body">
+        <strong>¿Cómo habilitar la cobertura?</strong>
+        <p>Añadir a <code>build.gradle</code>: plugin <code>'jacoco'</code>, configurar <code>jacocoTestReport</code> para generar XML, y agregar en <code>sonarqube</code> la propiedad <code>"sonar.coverage.jacoco.xmlReportPaths"</code>. Luego ejecutar <code>./gradlew test jacocoTestReport sonar</code>.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECCIÓN 6: PLAN DE ACCIÓN ══ -->
+  <div class="sec">
+    <div class="sec-header"><div class="num">6</div><h2>Plan de Acción Priorizado</h2></div>
+
+    <p>Basado en la combinación de severidad, esfuerzo y antigüedad, el orden recomendado de corrección es:</p>
+
+    <ol class="action-steps">
+      <li>
+        <div>
+          <strong>🔴 Sprint inmediato (54 min) — Literales duplicados + Métodos vacíos</strong>
+          Corregir los 9 issues CRITICAL en <code>HealingQualityGate.java</code>, <code>HealeniumLogger.java</code>, <code>HealeniumHealthCheck.java</code> y <code>HealeniumSerenityListener.java</code>. Son los de mayor impacto en mantenibilidad y los más recientes (< 2 semanas).
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>🟡 Próxima semana (25 min) — Constructores privados en Page Objects</strong>
+          Añadir constructor privado a <code>LoginPageUI</code>, <code>HomePageUI</code>, <code>CheckoutPageUI</code>, <code>ExcelReader</code> y <code>HealeniumLogger</code>. Cambio mecánico de 5 minutos por archivo.
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>🟡 Próxima semana (15 min) — Parámetros sin usar en Listeners</strong>
+          Resolver los 3 issues MAJOR en <code>HealeniumSerenityListener.java</code> y <code>HealeniumTestListener.java</code>. Quick Fix disponible en SonarQube y en IntelliJ.
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>🟢 Backlog técnico (43 min) — Renombrado de paquete + otros MINOR</strong>
+          Renombrar <code>userInterfaces</code> → <code>userinterfaces</code> (refactoring en IntelliJ), renombrar <code>OPC_MARCA</code>, resolver Boolean boxeado. Coordinar con el equipo porque renombrar el paquete afecta todos los imports.
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>🔵 Sin acción — Issues INFO</strong>
+          Marcar el Singleton de <code>HealeniumConfig</code> como "Won't Fix" en SonarQube con justificación: "Intencional — configuración global del módulo Healenium". Resolver el TODO o eliminarlo.
+        </div>
+      </li>
+    </ol>
+
+    <div class="box box-ok">
+      <div class="box-icon">🎯</div>
+      <div class="box-body">
+        <strong>Meta realista: reducir a 0 issues CRITICAL y MAJOR en 2 semanas</strong>
+        <p>Aplicando los pasos 1, 2 y 3 se eliminan 18 de los 23 issues (78%), se reduce la deuda técnica de 137 a 43 minutos y se pasa de 23 a 5 code smells — todos de severidad MINOR/INFO.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECCIÓN 7: GLOSARIO ══ -->
+  <div class="sec">
+    <div class="sec-header"><div class="num">7</div><h2>Glosario de Términos SonarQube</h2></div>
+    <dl class="glosario">
+      <dt>Quality Gate</dt>
+      <dd>Conjunto de condiciones que el proyecto debe cumplir para considerarse "apto". Si falla, el pipeline CI/CD puede bloquearse. Estado actual: PASSED.</dd>
+      <dt>Code Smell</dt>
+      <dd>Problema de mantenibilidad. El código funciona pero es difícil de leer, entender o modificar. No es un bug.</dd>
+      <dt>Bug</dt>
+      <dd>Código que casi seguramente producirá un comportamiento incorrecto en ejecución. Estado actual: 0.</dd>
+      <dt>Vulnerability</dt>
+      <dd>Fallo de seguridad que podría ser explotado por un atacante. Estado actual: 0.</dd>
+      <dt>Security Hotspot</dt>
+      <dd>Código sensible desde el punto de vista de seguridad que requiere revisión humana. Estado actual: 0.</dd>
+      <dt>Technical Debt (Deuda Técnica)</dt>
+      <dd>Tiempo estimado necesario para corregir todos los code smells. Actualmente: 137 minutos (0.5% del tiempo total del proyecto).</dd>
+      <dt>NCLOC</dt>
+      <dd>Non-Commented Lines of Code. Líneas de código reales excluyendo comentarios y líneas en blanco. Proyecto: 911.</dd>
+      <dt>Rating A–E</dt>
+      <dd>A = 0 bugs/vuln. B = 1 bug menor. C = bugs mayores. D = críticos. E = bloqueantes. El proyecto tiene A en todas las dimensiones.</dd>
+      <dt>Effort (Esfuerzo)</dt>
+      <dd>Tiempo estimado para corregir un issue específico, calculado automáticamente por SonarQube según el tipo de problema.</dd>
+      <dt>CRITICAL / MAJOR / MINOR / INFO</dt>
+      <dd>Severidad del issue. CRITICAL y MAJOR impactan la mantenibilidad del equipo. MINOR y INFO son mejoras de calidad opcionales.</dd>
+    </dl>
+  </div>
+
+  <div class="pie">
+    <p><strong>BrowserStack ScreenPlay — Reporte SonarQube 10.4.1</strong><br>
+    Análisis ejecutado: 18 Mar 2026 01:40 UTC · Commit: 3f2c6b8 · 911 NCLOC · Quality Gate: PASSED<br>
+    Generado por: Claude Code para el Gobierno de Automatización Telefónica</p>
+  </div>
+
+</div>
+</body>
+</html>

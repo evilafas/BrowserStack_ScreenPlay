@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía: Pruebas Estáticas con Docker — BrowserStack ScreenPlay</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --azul-tel: #0050a0;
+    --azul-claro: #0073e6;
+    --verde-ok: #00875a;
+    --naranja: #e07000;
+    --rojo-alerta: #c0392b;
+    --gris-fondo: #f4f6f9;
+    --gris-borde: #dde3ed;
+    --texto: #1a2332;
+    --texto-suave: #5a6a7e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--texto);
+    background: white;
+    font-size: 11pt;
+    line-height: 1.6;
+  }
+
+  /* PORTADA */
+  .portada {
+    background: linear-gradient(135deg, var(--azul-tel) 0%, #003070 50%, #001840 100%);
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px 40px;
+    page-break-after: always;
+  }
+
+  .portada .logo-area {
+    background: rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 20px 40px;
+    margin-bottom: 40px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .portada .logo-area .empresa {
+    font-size: 14pt;
+    font-weight: 300;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-bottom: 8px;
+  }
+
+  .portada .logo-area .proyecto {
+    font-size: 20pt;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .portada h1 {
+    font-size: 32pt;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    max-width: 700px;
+  }
+
+  .portada h1 span {
+    color: #5bc8f5;
+  }
+
+  .portada .subtitulo {
+    font-size: 14pt;
+    font-weight: 300;
+    opacity: 0.85;
+    margin-bottom: 50px;
+    max-width: 580px;
+  }
+
+  .portada .badges {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 50px;
+  }
+
+  .badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 9.5pt;
+    font-weight: 500;
+  }
+
+  .portada .meta {
+    border-top: 1px solid rgba(255,255,255,0.2);
+    padding-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    max-width: 600px;
+    width: 100%;
+  }
+
+  .portada .meta-item label {
+    display: block;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.6;
+    margin-bottom: 4px;
+  }
+
+  .portada .meta-item span {
+    font-size: 11pt;
+    font-weight: 500;
+  }
+
+  /* CONTENIDO */
+  .contenido {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 50px 60px;
+  }
+
+  /* ÍNDICE */
+  .indice {
+    background: var(--gris-fondo);
+    border-left: 4px solid var(--azul-tel);
+    border-radius: 0 8px 8px 0;
+    padding: 30px 35px;
+    margin-bottom: 50px;
+    page-break-after: always;
+  }
+
+  .indice h2 {
+    color: var(--azul-tel);
+    font-size: 16pt;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .indice ol {
+    list-style: none;
+    counter-reset: item;
+  }
+
+  .indice > ol > li {
+    counter-increment: item;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--gris-borde);
+  }
+
+  .indice > ol > li:last-child { border-bottom: none; }
+
+  .indice > ol > li::before {
+    content: counter(item) ". ";
+    color: var(--azul-tel);
+    font-weight: 700;
+    font-size: 11pt;
+  }
+
+  .indice > ol > li > span {
+    font-weight: 600;
+    font-size: 11pt;
+  }
+
+  .indice ol ol {
+    margin-left: 24px;
+    margin-top: 4px;
+    list-style: none;
+    counter-reset: subitem;
+  }
+
+  .indice ol ol li {
+    counter-increment: subitem;
+    font-size: 10pt;
+    color: var(--texto-suave);
+    padding: 3px 0;
+  }
+
+  .indice ol ol li::before {
+    content: counter(item) "." counter(subitem) " ";
+    color: var(--azul-claro);
+    font-weight: 500;
+  }
+
+  /* SECCIONES */
+  .seccion {
+    margin-bottom: 50px;
+    page-break-inside: avoid;
+  }
+
+  .seccion-header {
+    background: linear-gradient(90deg, var(--azul-tel), var(--azul-claro));
+    color: white;
+    padding: 14px 24px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .seccion-header .num {
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13pt;
+    flex-shrink: 0;
+  }
+
+  .seccion-header h2 {
+    font-size: 15pt;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .subseccion {
+    margin-bottom: 28px;
+  }
+
+  .subseccion h3 {
+    color: var(--azul-tel);
+    font-size: 12.5pt;
+    font-weight: 600;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--gris-borde);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .subseccion h4 {
+    color: var(--texto);
+    font-size: 11pt;
+    font-weight: 600;
+    margin: 16px 0 8px;
+  }
+
+  p { margin-bottom: 10px; }
+
+  /* CAJAS */
+  .info-box, .warning-box, .success-box, .tip-box {
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .info-box {
+    background: #e8f0fe;
+    border-left: 4px solid var(--azul-claro);
+  }
+
+  .warning-box {
+    background: #fff3e0;
+    border-left: 4px solid var(--naranja);
+  }
+
+  .success-box {
+    background: #e6f4ea;
+    border-left: 4px solid var(--verde-ok);
+  }
+
+  .tip-box {
+    background: #f3e8ff;
+    border-left: 4px solid #7c3aed;
+  }
+
+  .box-icon {
+    font-size: 16pt;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .box-content { flex: 1; }
+
+  .box-content strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 10.5pt;
+  }
+
+  .box-content p, .box-content li {
+    font-size: 10pt;
+    margin-bottom: 4px;
+  }
+
+  /* CÓDIGO */
+  pre {
+    background: #1e2a3a;
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    overflow-x: auto;
+    margin: 12px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9pt;
+    line-height: 1.5;
+    border: 1px solid #2d3748;
+  }
+
+  code {
+    background: #eef2f7;
+    color: var(--azul-tel);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9pt;
+  }
+
+  pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  /* Syntax coloring en código */
+  .kw { color: #7dd3fc; }     /* keywords */
+  .st { color: #86efac; }     /* strings */
+  .cm { color: #94a3b8; font-style: italic; } /* comments */
+  .fn { color: #fbbf24; }     /* functions */
+  .nb { color: #f9a8d4; }     /* numbers */
+  .op { color: #e2e8f0; }     /* operators */
+  .hl { color: #fde68a; }     /* highlighted */
+
+  /* TABLAS */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 10pt;
+  }
+
+  th {
+    background: var(--azul-tel);
+    color: white;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+  }
+
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--gris-borde);
+  }
+
+  tr:nth-child(even) td { background: var(--gris-fondo); }
+  tr:hover td { background: #e8f0fe; }
+
+  /* LISTAS */
+  ul, ol {
+    padding-left: 24px;
+    margin: 8px 0;
+  }
+
+  li { margin-bottom: 5px; }
+
+  ul li::marker { color: var(--azul-claro); }
+  ol li::marker { color: var(--azul-tel); font-weight: 600; }
+
+  /* PASOS */
+  .pasos {
+    counter-reset: paso;
+    list-style: none;
+    padding: 0;
+    margin: 16px 0;
+  }
+
+  .pasos li {
+    counter-increment: paso;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: flex-start;
+  }
+
+  .pasos li::before {
+    content: counter(paso);
+    background: var(--azul-tel);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 11pt;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .pasos li > div {
+    flex: 1;
+  }
+
+  .pasos li strong {
+    display: block;
+    font-size: 11pt;
+    color: var(--azul-tel);
+    margin-bottom: 4px;
+  }
+
+  /* ARQUITECTURA DIAGRAMA */
+  .arquitectura {
+    background: var(--gris-fondo);
+    border: 1px solid var(--gris-borde);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5pt;
+    line-height: 1.8;
+  }
+
+  /* HERRAMIENTAS CARDS */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: 16px 0;
+  }
+
+  .tool-card {
+    background: var(--gris-fondo);
+    border: 1px solid var(--gris-borde);
+    border-radius: 10px;
+    padding: 18px;
+    border-top: 3px solid var(--azul-claro);
+  }
+
+  .tool-card .tool-name {
+    font-weight: 700;
+    font-size: 12pt;
+    color: var(--azul-tel);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tool-card .tool-version {
+    font-size: 9pt;
+    color: var(--texto-suave);
+    font-family: 'JetBrains Mono', monospace;
+    background: white;
+    border: 1px solid var(--gris-borde);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    display: inline-block;
+  }
+
+  .tool-card p {
+    font-size: 10pt;
+    color: var(--texto-suave);
+    margin: 0;
+  }
+
+  /* PIE DE PAGINA */
+  .pie-pagina {
+    margin-top: 60px;
+    border-top: 2px solid var(--gris-borde);
+    padding-top: 20px;
+    text-align: center;
+    color: var(--texto-suave);
+    font-size: 9pt;
+  }
+
+  /* PRINT */
+  @media print {
+    body { font-size: 10pt; }
+    .portada { min-height: auto; padding: 40px; }
+    .contenido { padding: 30px 40px; }
+    .seccion { page-break-inside: avoid; }
+    .subseccion { page-break-inside: avoid; }
+    pre { page-break-inside: avoid; }
+    table { page-break-inside: avoid; }
+    .tools-grid { page-break-inside: avoid; }
+  }
+
+  /* SEPARADOR */
+  hr {
+    border: none;
+    border-top: 1px solid var(--gris-borde);
+    margin: 30px 0;
+  }
+
+  /* TAG CHIP */
+  .chip {
+    display: inline-block;
+    background: #e8f0fe;
+    color: var(--azul-tel);
+    border: 1px solid #c5d5f0;
+    border-radius: 12px;
+    padding: 3px 10px;
+    font-size: 9pt;
+    font-weight: 500;
+    margin: 2px;
+  }
+
+  .chip.verde { background: #e6f4ea; color: var(--verde-ok); border-color: #c3e6cb; }
+  .chip.naranja { background: #fff3e0; color: var(--naranja); border-color: #ffd8a0; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════ PORTADA -->
+<div class="portada">
+  <div class="logo-area">
+    <div class="empresa">Gobierno de Automatización</div>
+    <div class="proyecto">BrowserStack ScreenPlay</div>
+  </div>
+  <h1>Guía de Pruebas Estáticas con <span>Docker</span></h1>
+  <p class="subtitulo">
+    Implementación completa de análisis estático de código con Checkstyle, PMD, SpotBugs y SonarQube dockerizado
+  </p>
+  <div class="badges">
+    <span class="badge">Java 21</span>
+    <span class="badge">Checkstyle 10.17</span>
+    <span class="badge">PMD 7.5</span>
+    <span class="badge">SpotBugs 4.8.6</span>
+    <span class="badge">SonarQube 10.4</span>
+    <span class="badge">Docker Compose</span>
+    <span class="badge">Gradle 8.5</span>
+  </div>
+  <div class="meta">
+    <div class="meta-item">
+      <label>Versión</label>
+      <span>1.0.0</span>
+    </div>
+    <div class="meta-item">
+      <label>Fecha</label>
+      <span>Marzo 2026</span>
+    </div>
+    <div class="meta-item">
+      <label>Clasificación</label>
+      <span>Técnico Interno</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ CONTENIDO -->
+<div class="contenido">
+
+  <!-- ÍNDICE -->
+  <div class="indice">
+    <h2>📋 Tabla de Contenidos</h2>
+    <ol>
+      <li><span>Introducción y Objetivos</span>
+        <ol>
+          <li>¿Qué son las pruebas estáticas?</li>
+          <li>Herramientas del stack</li>
+          <li>Arquitectura de la solución</li>
+        </ol>
+      </li>
+      <li><span>Prerrequisitos</span>
+        <ol>
+          <li>Requisitos de sistema</li>
+          <li>Software requerido</li>
+          <li>Verificación del entorno</li>
+        </ol>
+      </li>
+      <li><span>Configuración de Herramientas de Análisis</span>
+        <ol>
+          <li>Checkstyle — Estilo de código</li>
+          <li>PMD — Análisis de código fuente</li>
+          <li>SpotBugs — Detección de bugs en bytecode</li>
+        </ol>
+      </li>
+      <li><span>Integración en Gradle</span>
+        <ol>
+          <li>Actualización de gradle.properties</li>
+          <li>Configuración de build.gradle</li>
+          <li>Tareas Gradle disponibles</li>
+        </ol>
+      </li>
+      <li><span>SonarQube con Docker</span>
+        <ol>
+          <li>Arquitectura Docker</li>
+          <li>docker-compose.yml</li>
+          <li>Inicialización de la base de datos</li>
+          <li>Levantamiento del servicio</li>
+        </ol>
+      </li>
+      <li><span>Ejecución Paso a Paso</span>
+        <ol>
+          <li>Análisis estático local (sin SonarQube)</li>
+          <li>Análisis completo con SonarQube</li>
+          <li>Interpretación de reportes</li>
+        </ol>
+      </li>
+      <li><span>Reportes y Quality Gates</span>
+        <ol>
+          <li>Reportes HTML generados</li>
+          <li>Configuración del Quality Gate en SonarQube</li>
+        </ol>
+      </li>
+      <li><span>Integración CI/CD</span></li>
+      <li><span>Resolución de Problemas</span></li>
+      <li><span>Referencia Rápida</span></li>
+    </ol>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SECCIÓN 1: INTRODUCCIÓN
+       ══════════════════════════════════════════ -->
+  <div class="seccion">
+    <div class="seccion-header">
+      <div class="num">1</div>
+      <h2>Introducción y Objetivos</h2>
+    </div>
+
+    <div class="subseccion">
+      <h3>🔍 1.1 ¿Qué son las Pruebas Estáticas?</h3>
+      <p>
+        Las <strong>pruebas estáticas</strong> (o análisis estático de código) son técnicas de verificación que inspeccionan
+        el código fuente <em>sin ejecutarlo</em>. A diferencia de las pruebas dinámicas (que ejecutan el sistema),
+        el análisis estático detecta defectos en la fase de desarrollo, reduciendo el coste de corrección
+        hasta 10 veces respecto a los encontrados en producción.
+      </p>
+      <p>
+        En el contexto del <strong>Gobierno de Automatización Telefónica</strong>, el análisis estático es una capa
+        obligatoria de calidad que complementa las pruebas funcionales BDD de Serenity.
+      </p>
+
+      <div class="info-box">
+        <div class="box-icon">💡</div>
+        <div class="box-content">
+          <strong>¿Por qué análisis estático en proyectos de automatización?</strong>
+          <p>El código de automatización es código de producción en cuanto a mantenibilidad. Los mismos
+          defectos de diseño (código duplicado, complejidad innecesaria, vulnerabilidades) que
+          afectan al software de negocio también afectan a los frameworks de pruebas.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="subseccion">
+      <h3>🛠️ 1.2 Herramientas del Stack</h3>
+      <div class="tools-grid">
+        <div class="tool-card">
+          <div class="tool-name">📐 Checkstyle</div>
+          <div class="tool-version">v10.17.0</div>
+          <p>Verifica que el código sigue las convenciones de estilo definidas por el gobierno Telefónica:
+          nomenclatura PascalCase/camelCase/UPPER_SNAKE_CASE, longitud de líneas, espaciado, imports.</p>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">🔬 PMD</div>
+          <div class="tool-version">v7.5.0</div>
+          <p>Analiza el AST (árbol sintáctico) del código fuente para detectar: código muerto, duplicaciones,
+          complejidad ciclomática elevada, malas prácticas y vulnerabilidades de seguridad.</p>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">🐛 SpotBugs</div>
+          <div class="tool-version">v4.8.6</div>
+          <p>Analiza el <em>bytecode</em> compilado (.class) para detectar patrones de bugs conocidos:
+          null pointer exceptions, recursos no cerrados, condiciones de carrera, inyección SQL.</p>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">📊 SonarQube</div>
+          <div class="tool-version">v10.4 Community</div>
+          <p>Plataforma centralizada de calidad. Agrega resultados de todas las herramientas, calcula
+          deuda técnica, gestiona Quality Gates y muestra tendencias históricas. Corre en Docker.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="subseccion">
+      <h3>🏗️ 1.3 Arquitectura de la Solución</h3>
+      <div class="arquitectura">
+        <pre style="background:transparent; color: var(--texto); border:none; padding:0; font-size:9pt;">
+  ┌─────────────────────────────────────────────────────────────────┐
+  │                  MÁQUINA DEL DESARROLLADOR                      │
+  │                                                                 │
+  │   Código Java  ──►  Gradle staticAnalysis                       │
+  │                         │                                       │
+  │              ┌──────────┼──────────┐                           │
+  │              ▼          ▼          ▼                            │
+  │         Checkstyle    PMD      SpotBugs                         │
+  │         (estilo)    (AST)     (bytecode)                        │
+  │              │          │          │                            │
+  │              └──────────┴──────────┘                           │
+  │                         │                                       │
+  │                  build/reports/                                 │
+  │                  (HTML + XML)                                   │
+  │                         │                                       │
+  │              gradle sonarqube ──────────────────────────────┐  │
+  │                                                             │  │
+  └─────────────────────────────────────────────────────────────┼──┘
+                                                                │
+  ┌─────────────────────────────────────────────────────────────▼──┐
+  │                    DOCKER COMPOSE                               │
+  │                                                                 │
+  │   ┌──────────────────┐    ┌─────────────────────────────────┐  │
+  │   │   sonarqube-db   │    │         SonarQube               │  │
+  │   │  PostgreSQL 14   │◄───│  sonarqube:10.4-community       │  │
+  │   │   puerto 5433    │    │        puerto 9000              │  │
+  │   └──────────────────┘    └─────────────────────────────────┘  │
+  │                                                                 │
+  │   ┌──────────────────┐    ┌─────────────┐  ┌───────────────┐  │
+  │   │   healenium-db   │    │  Healenium  │  │  Selector     │  │
+  │   │  PostgreSQL 14   │    │  Backend    │  │  Imitator     │  │
+  │   │   puerto 5432    │    │  p. 7878    │  │  p. 8000      │  │
+  │   └──────────────────┘    └─────────────┘  └───────────────┘  │
+  └─────────────────────────────────────────────────────────────────┘</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SECCIÓN 2: PRERREQUISITOS
+       ══════════════════════════════════════════ -->
+  <div class="seccion">
+    <div class="seccion-header">
+      <div class="num">2</div>
+      <h2>Prerrequisitos</h2>
+    </div>
+
+    <div class="subseccion">
+      <h3>💻 2.1 Requisitos de Sistema</h3>
+      <table>
+        <tr>
+          <th>Recurso</th>
+          <th>Mínimo</th>
+          <th>Recomendado</th>
+          <th>Observación</th>
+        </tr>
+        <tr>
+          <td>RAM</td>
+          <td>8 GB</td>
+          <td>16 GB</td>
+          <td>SonarQube necesita ~4 GB</td>
+        </tr>
+        <tr>
+          <td>Disco</td>
+          <td>10 GB libres</td>
+          <td>20 GB libres</td>
+          <td>Imágenes Docker + datos</td>
+        </tr>
+        <tr>
+          <td>CPU</td>
+          <td>2 cores</td>
+          <td>4+ cores</td>
+          <td>ElasticSearch en SonarQube</td>
+        </tr>
+        <tr>
+          <td>SO</td>
+          <td colspan="3">Windows 10/11 Pro, macOS 12+, Ubuntu 20.04+</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="subseccion">
+      <h3>📦 2.2 Software Requerido</h3>
+      <ol class="pasos">
+        <li>
+          <div>
+            <strong>Java Development Kit 21 (JDK)</strong>
+            Requerido para compilar y ejecutar el análisis. Verificar con:
+            <pre><code>java -version
+# Esperado: java version "21.x.x"</code></pre>
+            Descarga: <a href="https://adoptium.net">Eclipse Temurin 21</a> (recomendado por el gobierno Telefónica)
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Docker Desktop 4.20+</strong>
+            Para correr SonarQube y su base de datos PostgreSQL en contenedores.
+            <pre><code>docker --version
+# Esperado: Docker version 24.x o superior
+
+docker compose version
+# Esperado: Docker Compose version v2.x</code></pre>
+            <div class="warning-box" style="margin-top:8px">
+              <div class="box-icon">⚠️</div>
+              <div class="box-content">
+                <strong>Windows: Configuración WSL2</strong>
+                <p>Docker Desktop en Windows requiere WSL2 y virtualización habilitada en BIOS.
+                Además, SonarQube necesita que <code>vm.max_map_count=262144</code> esté configurado en WSL2.</p>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Gradle 8.5</strong> (incluido via Gradle Wrapper — no requiere instalación manual)
+            <pre><code>./gradlew --version
+# Esperado: Gradle 8.5</code></pre>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Git 2.40+</strong>
+            <pre><code>git --version</code></pre>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="subseccion">
+      <h3>✅ 2.3 Verificación del Entorno</h3>
+      <p>Ejecutar el siguiente script para verificar todos los prerrequisitos de una vez:</p>
+      <pre><code><span class="cm"># Windows (PowerShell) - verificación del entorno</span>
+Write-Host "=== Verificación de Prerrequisitos ===" -ForegroundColor Cyan
+
+<span class="cm"># Java</span>
+java -version 2>&1 | Select-String "version"
+
+<span class="cm"># Docker</span>
+docker --version
+docker compose version
+
+<span class="cm"># Gradle Wrapper</span>
+.\gradlew.bat --version | Select-String "Gradle"
+
+<span class="cm"># Memoria disponible</span>
+Get-CimInstance -ClassName Win32_OperatingSystem |
+  Select-Object @{N='RAM_GB';E={[math]::Round($_.TotalVisibleMemorySize/1MB,1)}}</code></pre>
+
+      <div class="success-box">
+        <div class="box-icon">✅</div>
+        <div class="box-content">
+          <strong>Entorno listo cuando veas:</strong>
+          <p>Java 21.x.x · Docker 24.x+ · Docker Compose v2.x · Gradle 8.5</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SECCIÓN 3: CONFIGURACIÓN DE HERRAMIENTAS
+       ══════════════════════════════════════════ -->
+  <div class="seccion">
+    <div class="seccion-header">
+      <div class="num">3</div>
+      <h2>Configuración de Herramientas de Análisis</h2>
+    </div>
+
+    <div class="info-box">
+      <div class="box-icon">📁</div>
+      <div class="box-content">
+        <strong>Estructura de configuración creada:</strong>
+        <p><code>config/checkstyle/checkstyle.xml</code> · <code>config/checkstyle/suppressions.xml</code>
+        · <code>config/pmd/ruleset.xml</code> · <code>config/spotbugs/exclude.xml</code></p>
+      </div>
+    </div>
+
+    <div class="subseccion">
+      <h3>📐 3.1 Checkstyle — Estilo de Código</h3>
+      <p>
+        Checkstyle verifica que el código fuente cumple con las convenciones del
+        <strong>Gobierno de Automatización Telefónica</strong>. La configuración principal se encuentra en
+        <code>config/checkstyle/checkstyle.xml</code>.
+      </p>
+
+      <h4>Reglas principales configuradas:</h4>
+      <table>
+        <tr>
+          <th>Categoría</th>
+          <th>Regla</th>
+          <th>Descripción</th>
+        </tr>
+        <tr>
+          <td>Nomenclatura</td>
+          <td>TypeName</td>
+          <td>Clases en PascalCase</td>
+        </tr>
+        <tr>
+          <td>Nomenclatura</td>
+          <td>MethodName</td>
+          <td>Métodos en camelCase</td>
+        </tr>
+        <tr>
+          <td>Nomenclatura</td>
+          <td>ConstantName</td>
+          <td>Constantes en UPPER_SNAKE_CASE (TXT_, BTN_, INPUT_...)</td>
+        </tr>
+        <tr>
+          <td>Imports</td>
+          <td>AvoidStarImport</td>
+          <td>Prohibidos imports con <code>.*</code></td>
+        </tr>
+        <tr>
+          <td>Formato</td>
+          <td>LineLength</td>
+          <td>Máximo 150 caracteres por línea</td>
+        </tr>
+        <tr>
+          <td>Buenas prácticas</td>
+          <td>Regexp</td>
+          <td>Prohibido System.out/err.print (usar SLF4J)</td>
+        </tr>
+        <tr>
+          <td>Llaves</td>
+          <td>NeedBraces</td>
+          <td>Siempre usar llaves en bloques if/for/while</td>
+        </tr>
+      </table>
+
+      <h4>Supresiones (suppressions.xml):</h4>
+      <p>Las siguientes áreas tienen reglas relajadas intencionalmente:</p>
+      <ul>
+        <li><code>src/test/</code> — Sin requisito de Javadoc</li>
+        <li><code>*Runner.java</code> — Líneas largas permitidas (@CucumberOptions)</li>
+        <li><code>*UI.java</code> — Líneas largas permitidas (Targets de Screenplay)</li>
+        <li><code>UserData.java</code> — Clase Lombok, reglas generadas</li>
+      </ul>
+    </div>
+
+    <div class="subseccion">
+      <h3>🔬 3.2 PMD — Análisis de Código Fuente</h3>
+      <p>
+        PMD analiza el árbol de sintaxis abstracta (AST) del código para detectar patrones problemáticos.
+        El conjunto de reglas en <code>config/pmd/ruleset.xml</code> está adaptado al patrón Screenplay.
+      </p>
+
+      <h4>Conjuntos de reglas activos:</h4>
+      <ul>
+        <li><span class="chip verde">activo</span> <strong>bestpractices</strong> — Mejores prácticas de Java</li>
+        <li><span class="chip verde">activo</span> <strong>codestyle</strong> — Estilo y convenciones</li>
+        <li><span class="chip verde">activo</span> <strong>design</strong> — Principios de diseño (SOLID)</li>
+        <li><span class="chip verde">activo</span> <strong>errorprone</strong> — Patrones propensos a errores</li>
+        <li><span class="chip verde">activo</span> <strong>security</strong> — Vulnerabilidades OWASP</li>
+        <li><span class="chip verde">activo</span> <strong>performance</strong> — Problemas de rendimiento</li>
+        <li><span class="chip verde">activo</span> <strong>multithreading</strong> — Concurrencia segura</li>
+      </ul>
+
+      <div class="tip-box">
+        <div class="box-icon">💜</div>
+        <div class="box-content">
+          <strong>Adaptaciones para Screenplay Pattern</strong>
+          <p>Se excluyen reglas que generarían falsos positivos en el patrón Actor-Task-Interaction:
+          <code>AbstractClassWithoutAbstractMethod</code>, <code>LawOfDemeter</code> (la cadena fluida
+          de Screenplay viola formalmente esta regla pero es el diseño intencionado).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="subseccion">
+      <h3>🐛 3.3 SpotBugs — Detección de Bugs en Bytecode</h3>
+      <p>
+        SpotBugs analiza el <em>bytecode</em> compilado (.class) usando más de 400 patrones de bugs conocidos.
+        El filtro de exclusión en <code>config/spotbugs/exclude.xml</code> elimina falsos positivos del framework.
+      </p>
+
+      <h4>Configuración principal:</h4>
+      <table>
+        <tr>
+          <th>Parámetro</th>
+          <th>Valor</th>
+          <th>Descripción</th>
+        </tr>
+        <tr>
+          <td>effort</td>
+          <td><code>max</code></td>
+          <td>Máximo esfuerzo de análisis (más preciso, más lento)</td>
+        </tr>
+        <tr>
+          <td>reportLevel</td>
+          <td><code>medium</code></td>
+          <td>Reportar bugs de prioridad media y alta</td>
+        </tr>
+        <tr>
+          <td>excludeFilter</td>
+          <td><code>config/spotbugs/exclude.xml</code></td>
+          <td>Filtro de falsos positivos</td>
+        </tr>
+      </table>
+
+      <h4>Exclusiones principales configuradas:</h4>
+      <ul>
+        <li>Clases generadas por <strong>Lombok</strong> (<code>SE_BAD_FIELD</code>)</li>
+        <li>Tasks de Screenplay — <code>Tasks.instrumented()</code> usa reflexión</li>
+        <li>Excepciones personalizadas — sin <code>serialVersionUID</code> (no necesario en tests)</li>
+        <li>SelfHealingDriverSource — interoperabilidad con Healenium</li>
+        <li>ExcelReader — recursos Apache POI gestionados con try-with-resources</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SECCIÓN 4: INTEGRACIÓN EN GRADLE
+       ══════════════════════════════════════════ -->
+  <div class="seccion">
+    <div class="seccion-header">
+      <div class="num">4</div>
+      <h2>Integración en Gradle</h2>
+    </div>
+
+    <div class="subseccion">
+      <h3>⚙️ 4.1 Actualización de gradle.properties</h3>
+      <p>Se añaden las versiones de los nuevos plugins al archivo <code>gradle.properties</code>:</p>
+      <pre><code><span class="cm"># ── Análisis estático ──────────────────────────────────────</span>
+spotbugsPlugin=6.0.9
+sonarPlugin=4.4.1.3373
+checkstyleVersion=10.17.0
+pmdVersion=7.5.0
+spotbugsVersion=4.8.6</code></pre>
+    </div>
+
+    <div class="subseccion">
+      <h3>🔧 4.2 Configuración de build.gradle</h3>
+      <p>El <code>build.gradle</code> se actualiza con tres bloques principales:</p>
+
+      <h4>1. Declaración de plugins en buildscript:</h4>
+      <pre><code>buildscript {
+    dependencies {
+        classpath <span class="st">"net.serenity-bdd:serenity-gradle-plugin:${gradlePlugin}"</span>
+        classpath <span class="st">"com.github.spotbugs.snom:spotbugs-gradle-plugin:${spotbugsPlugin}"</span>
+        classpath <span class="st">"org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:${sonarPlugin}"</span>
+    }
+}
+
+<span class="kw">apply</span> plugin: <span class="st">'checkstyle'</span>        <span class="cm">// plugin built-in de Gradle</span>
+<span class="kw">apply</span> plugin: <span class="st">'pmd'</span>               <span class="cm">// plugin built-in de Gradle</span>
+<span class="kw">apply</span> plugin: <span class="st">'com.github.spotbugs'</span>  <span class="cm">// plugin externo via buildscript</span>
+<span class="kw">apply</span> plugin: <span class="st">'org.sonarqube'</span>      <span class="cm">// plugin externo via buildscript</span></code></pre>
+
+      <h4>2. Configuración de cada herramienta:</h4>
+      <pre><code><span class="cm">// Checkstyle</span>
+checkstyle {
+    toolVersion = checkstyleVersion
+    configFile = <span class="fn">file</span>(<span class="st">"${project.rootDir}/config/checkstyle/checkstyle.xml"</span>)
+    configProperties = [<span class="st">'config_loc'</span>: <span class="st">"${project.rootDir}/config/checkstyle"</span>]
+    maxWarnings = <span class="nb">0</span>
+}
+
+<span class="cm">// PMD</span>
+pmd {
+    toolVersion = pmdVersion
+    ruleSetFiles = <span class="fn">files</span>(<span class="st">"${project.rootDir}/config/pmd/ruleset.xml"</span>)
+    ruleSets = []   <span class="cm">// Desactivar ruleset por defecto</span>
+}
+
+<span class="cm">// SpotBugs</span>
+spotbugs {
+    toolVersion = spotbugsVersion
+    excludeFilter = <span class="fn">file</span>(<span class="st">"${project.rootDir}/config/spotbugs/exclude.xml"</span>)
+    effort = <span class="st">'max'</span>
+    reportLevel = <span class="st">'medium'</span>
+}
+
+<span class="cm">// SonarQube</span>
+sonarqube {
+    properties {
+        property <span class="st">"sonar.projectKey"</span>,   <span class="st">"browserstack-screenplay"</span>
+        property <span class="st">"sonar.host.url"</span>,     System.<span class="fn">getProperty</span>(<span class="st">"sonar.host.url"</span>, <span class="st">"http://localhost:9000"</span>)
+        property <span class="st">"sonar.token"</span>,        System.<span class="fn">getProperty</span>(<span class="st">"sonar.token"</span>, <span class="st">""</span>)
+    }
+}</code></pre>
+
+      <h4>3. Tarea aggregadora:</h4>
+      <pre><code>task <span class="fn">staticAnalysis</span> {
+    group = <span class="st">'verification'</span>
+    description = <span class="st">'Ejecuta Checkstyle + PMD + SpotBugs en el código fuente'</span>
+    dependsOn checkstyleMain, checkstyleTest, pmdMain, pmdTest, spotbugsMain, spotbugsTest
+}</code></pre>
+    </div>
+
+    <div class="subseccion">
+      <h3>📋 4.3 Tareas Gradle Disponibles</h3>
+      <table>
+        <tr>
+          <th>Tarea</th>
+          <th>Descripción</th>
+          <th>Comando</th>
+        </tr>
+        <tr>
+          <td><code>checkstyleMain</code></td>
+          <td>Checkstyle sobre src/main/java</td>
+          <td><code>./gradlew checkstyleMain</code></td>
+        </tr>
+        <tr>
+          <td><code>checkstyleTest</code></td>
+          <td>Checkstyle sobre src/test/java</td>
+          <td><code>./gradlew checkstyleTest</code></td>
+        </tr>
+        <tr>
+          <td><code>pmdMain</code></td>
+          <td>PMD sobre src/main/java</td>
+          <td><code>./gradlew pmdMain</code></td>
+        </tr>
+        <tr>
+          <td><code>pmdTest</code></td>
+          <td>PMD sobre src/test/java</td>
+          <td><code>./gradlew pmdTest</code></td>
+        </tr>
+        <tr>
+          <td><code>spotbugsMain</code></td>
+          <td>SpotBugs sobre clases compiladas main</td>
+          <td><code>./gradlew spotbugsMain</code></td>
+        </tr>
+        <tr>
+          <td><code>spotbugsTest</code></td>
+          <td>SpotBugs sobre clases compiladas test</td>
+          <td><code>./gradlew spotbugsTest</code></td>
+        </tr>
+        <tr>
+          <td><code>staticAnalysis</code></td>
+          <td>Todas las herramientas a la vez</td>
+          <td><code>./gradlew staticAnalysis</code></td>
+        </tr>
+        <tr>
+          <td><code>sonarqube</code></td>
+          <td>Enviar análisis a SonarQube</td>
+          <td><code>./gradlew sonarqube -Dsonar.token=TU_TOKEN</code></td>
+        </tr>
+        <tr>
+          <td><code>sonarAnalysis</code></td>
+          <td>Compilar + analizar + enviar a Sonar</td>
+          <td><code>./gradlew sonarAnalysis -Dsonar.token=TU_TOKEN</code></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SECCIÓN 5: SONARQUBE CON DOCKER
+       ══════════════════════════════════════════ -->
+  <div class="seccion">
+    <div class="seccion-header">
+      <div class="num">5</div>
+      <h2>SonarQube con Docker</h2>
+    </div>
+
+    <div class="subseccion">
+      <h3>🐋 5.1 Arquitectura Docker</h3>
+      <p>
+        Se añaden dos servicios nuevos al <code>docker-compose.yml</code> existente (que ya tenía los
+        servicios de Healenium). Los servicios SonarQube usan su propia red interna y volúmenes
+        nombrados para persistir datos entre reinicios.
+      </p>
+
+      <table>
+        <tr>
+          <th>Servicio</th>
+          <th>Imagen</th>
+          <th>Puerto Host</th>
+          <th>Descripción</th>
+        </tr>
+        <tr>
+          <td><code>sonarqube-db</code></td>
+          <td>postgres:14-alpine</td>
+          <td>5433</td>
+          <td>Base de datos de SonarQube (separada de Healenium)</td>
+        </tr>
+        <tr>
+          <td><code>sonarqube</code></td>
+          <td>sonarqube:10.4-community</td>
+          <td>9000</td>
+          <td>Servidor SonarQube. UI en http://localhost:9000</td>
+        </tr>
+      </table>
+
+      <div class="warning-box">
+        <div class="box-icon">⚠️</div>
+        <div class="box-content">
+          <strong>Importante: vm.max_map_count en Windows/WSL2</strong>
+          <p>SonarQube usa Elasticsearch que requiere <code>vm.max_map_count ≥ 262144</code>.
+          En Windows con Docker Desktop (WSL2), ejecutar en PowerShell como Admin:</p>
+          <pre style="margin-top:8px"><code>wsl -d docker-desktop
+sysctl -w vm.max_map_count=262144</code></pre>
+          <p>Para hacerlo permanente, crear el archivo <code>%USERPROFILE%\.wslconfig</code>:</p>
+          <pre style="margin-top:8px"><code>[wsl2]
+kernelCommandLine = sysctl.vm.max_map_count=262144</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="subseccion">
+      <h3>📄 5.2 Configuración docker-compose.yml (servicios nuevos)</h3>
+      <pre><code><span class="cm"># ═══════════════════════════════════════════════════════════</span>
+<span class="cm"># SONARQUBE — Plataforma de Calidad de Código</span>
+<span class="cm"># ═══════════════════════════════════════════════════════════</span>
+
+<span class="hl">sonarqube-db</span>:
+  image: <span class="st">postgres:14-alpine</span>
+  container_name: sonarqube-db
+  environment:
+    POSTGRES_DB: <span class="st">sonarqube</span>
+    POSTGRES_USER: <span class="st">sonar</span>
+    POSTGRES_PASSWORD: <span class="st">sonar_pass</span>
+  volumes:
+    - <span class="st">sonarqube_db_data:/var/lib/postgresql/data</span>
+    - <span class="st">./docker/sonar-init:/docker-entrypoint-initdb.d</span>
+  ports:
+    - <span class="st">"5433:5432"</span>      <span class="cm"># Puerto diferente a Healenium (5432)</span>
+  healthcheck:
+    test: [<span class="st">"CMD-SHELL"</span>, <span class="st">"pg_isready -U sonar -d sonarqube"</span>]
+    interval: 10s
+    timeout: 5s
+    retries: 10
+  networks:
+    - sonar-net
+
+<span class="hl">sonarqube</span>:
+  image: <span class="st">sonarqube:10.4-community</span>
+  container_name: sonarqube
+  depends_on:
+    sonarqube-db:
+      condition: service_healthy
+  environment:
+    SONAR_JDBC_URL: <span class="st">jdbc:postgresql://sonarqube-db:5432/sonarqube</span>
+    SONAR_JDBC_USERNAME: <span class="st">sonar</span>
+    SONAR_JDBC_PASSWORD: <span class="st">sonar_pass</span>
+    SONAR_CE_JAVAOPTS: <span class="st">"-Xmx1g -Xms256m"</span>
+    SONAR_WEB_JAVAOPTS: <span class="st">"-Xmx512m -Xms128m"</span>
+    SONAR_SEARCH_JAVAOPTS: <span class="st">"-Xmx512m -Xms512m"</span>
+  volumes:
+    - <span class="st">sonarqube_data:/opt/sonarqube/data</span>
+    - <span class="st">sonarqube_extensions:/opt/sonarqube/extensions</span>
+    - <span class="st">sonarqube_logs:/opt/sonarqube/logs</span>
+  ports:
+    - <span class="st">"9000:9000"</span>
+  ulimits:
+    nofile:
+      soft: <span class="nb">65536</span>
+      hard: <span class="nb">65536</span>
+  networks:
+    - sonar-net</code></pre>
+    </div>
+
+    <div class="subseccion">
+      <h3>🗄️ 5.3 Inicialización de Base de Datos</h3>
+      <p>El archivo <code>docker/sonar-init/01-init-sonarqube.sql</code> se ejecuta automáticamente
+      al crear el contenedor <code>sonarqube-db</code>:</p>
+      <pre><code><span class="cm">-- Crear base de datos sonarqube</span>
+<span class="kw">CREATE DATABASE</span> sonarqube
+    <span class="kw">WITH OWNER</span> = sonar
+    <span class="kw">ENCODING</span> = <span class="st">'UTF8'</span>;
+
+<span class="kw">GRANT ALL PRIVILEGES ON DATABASE</span> sonarqube <span class="kw">TO</span> sonar;
+<span class="kw">ALTER USER</span> sonar <span class="kw">WITH SUPERUSER</span>;</code></pre>
+    </div>
+
+    <div class="subseccion">
+      <h3>🚀 5.4 Levantamiento del Servicio SonarQube</h3>
+      <ol class="pasos">
+        <li>
+          <div>
+            <strong>Configurar vm.max_map_count (solo primera vez en Windows)</strong>
+            <pre><code><span class="cm"># PowerShell como Administrador</span>
+wsl -d docker-desktop sysctl -w vm.max_map_count=262144</code></pre>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Iniciar solo los servicios SonarQube</strong>
+            <pre><code><span class="cm"># Solo SonarQube (sin Healenium)</span>
+docker compose up sonarqube-db sonarqube -d
+
+<span class="cm"># O todos los servicios</span>
+docker compose up -d</code></pre>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Esperar a que SonarQube esté listo (~2-3 minutos)</strong>
+            <pre><code><span class="cm"># Ver logs en tiempo real</span>
+docker compose logs -f sonarqube
+
+<span class="cm"># O verificar el healthcheck</span>
+docker compose ps sonarqube
+<span class="cm"># Esperar status: healthy</span></code></pre>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Acceder al portal web</strong>
+            <p>Abrir en el navegador: <code>http://localhost:9000</code></p>
+            <p>Credenciales por defecto:</p>
+            <ul>
+              <li>Usuario: <code>admin</code></li>
+              <li>Contraseña: <code>admin</code></li>
+            </ul>
+            <div class="warning-box" style="margin-top:8px">
+              <div class="box-icon">🔐</div>
+              <div class="box-content">
+                <p>SonarQube pedirá cambiar la contraseña en el primer login. Cambiarla por una segura.</p>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Generar token de análisis</strong>
+            <p>En el portal: <strong>My Account → Security → Generate Tokens</strong></p>
+            <p>Tipo: <em>Global Analysis Token</em> o <em>Project Analysis Token</em></p>
+            <p>Guardar el token generado — solo se muestra una vez.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SECCIÓN 6: EJECUCIÓN PASO A PASO
+       ══════════════════════════════════════════ -->
+  <div class="seccion">
+    <div class="seccion-header">
+      <div class="num">6</div>
+      <h2>Ejecución Paso a Paso</h2>
+    </div>
+
+    <div class="subseccion">
+      <h3>⚡ 6.1 Análisis Estático Local (sin SonarQube)</h3>
+      <p>Ideal para retroalimentación rápida durante el desarrollo. No requiere Docker.</p>
+
+      <pre><code><span class="cm"># Desde la raíz del proyecto</span>
+
+<span class="cm"># Solo Checkstyle (código principal)</span>
+.\gradlew.bat checkstyleMain
+
+<span class="cm"># Solo PMD</span>
+.\gradlew.bat pmdMain
+
+<span class="cm"># Solo SpotBugs (requiere compilación previa)</span>
+.\gradlew.bat spotbugsMain
+
+<span class="cm"># Todo de una vez (recomendado)</span>
+.\gradlew.bat staticAnalysis
+
+<span class="cm"># Ver reportes HTML generados</span>
+start build\reports\checkstyle\main.html
+start build\reports\pmd\main.html
+start build\reports\spotbugs\main.html</code></pre>
+
+      <div class="success-box">
+        <div class="box-icon">✅</div>
+        <div class="box-content">
+          <strong>Salida esperada cuando no hay violations:</strong>
+          <pre style="margin-top:8px"><code>═══════════════════════════════════════════════════
+ ✅  Análisis estático completado
+     Reportes en: build/reports/
+     • Checkstyle : build/reports/checkstyle/
+     • PMD        : build/reports/pmd/
+     • SpotBugs   : build/reports/spotbugs/
+═══════════════════════════════════════════════════
+BUILD SUCCESSFUL in 45s</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="subseccion">
+      <h3>📊 6.2 Análisis Completo con SonarQube</h3>
+
+      <h4>Paso 1 — Levantar SonarQube en Docker:</h4>
+      <pre><code>docker compose up sonarqube-db sonarqube -d
+docker compose logs -f sonarqube <span class="cm"># Esperar "SonarQube is up"</span></code></pre>
+
+      <h4>Paso 2 — Compilar el proyecto:</h4>
+      <pre><code>.\gradlew.bat compileJava compileTestJava</code></pre>
+
+      <h4>Paso 3 — Ejecutar análisis estático local:</h4>
+      <pre><code>.\gradlew.bat staticAnalysis</code></pre>
+
+      <h4>Paso 4 — Enviar a SonarQube:</h4>
+      <pre><code><span class="cm"># Reemplazar TU_TOKEN con el token generado en el portal</span>
+.\gradlew.bat sonarqube -Dsonar.token=TU_TOKEN
+
+<span class="cm"># O usar la tarea sonarAnalysis que hace todo en un paso:</span>
+.\gradlew.bat sonarAnalysis -Dsonar.token=TU_TOKEN</code></pre>
+
+      <h4>Paso 5 — Ver resultados:</h4>
+      <p>Abrir <code>http://localhost:9000/dashboard?id=browserstack-screenplay</code></p>
+    </div>
+
+    <div class="subseccion">
+      <h3>🔍 6.3 Interpretación de Reportes Locales</h3>
+      <table>
+        <tr>
+          <th>Herramienta</th>
+          <th>Reporte HTML</th>
+          <th>Reporte XML (para Sonar)</th>
+        </tr>
+        <tr>
+          <td>Checkstyle</td>
+          <td><code>build/reports/checkstyle/main.html</code></td>
+          <td><code>build/reports/checkstyle/main.xml</code></td>
+        </tr>
+        <tr>
+          <td>PMD</td>
+          <td><code>build/reports/pmd/main.html</code></td>
+          <td><code>build/reports/pmd/main.xml</code></td>
+        </tr>
+        <tr>
+          <td>SpotBugs</td>
+          <td><code>build/reports/spotbugs/main.html</code></td>
+          <td><code>build/reports/spotbugs/main.xml</code></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SECCIÓN 7: REPORTES Y QUALITY GATES
+       ══════════════════════════════════════════ -->
+  <div class="seccion">
+    <div class="seccion-header">
+      <div class="num">7</div>
+      <h2>Reportes y Quality Gates</h2>
+    </div>
+
+    <div class="subseccion">
+      <h3>📈 7.1 Reportes HTML Generados</h3>
+      <p>Cada herramienta genera un reporte HTML interactivo en <code>build/reports/</code>.
+      Los reportes incluyen:</p>
+      <ul>
+        <li><strong>Checkstyle:</strong> Lista de violaciones de estilo con enlace al archivo y línea</li>
+        <li><strong>PMD:</strong> Violaciones por categoría con descripción y prioridad</li>
+        <li><strong>SpotBugs:</strong> Bugs por categoría (CORRECTNESS, PERFORMANCE, SECURITY) con stack trace</li>
+      </ul>
+    </div>
+
+    <div class="subseccion">
+      <h3>🚦 7.2 Configuración del Quality Gate en SonarQube</h3>
+      <p>El <strong>Quality Gate</strong> es el semáforo que decide si el análisis "pasa" o "falla"
+      según umbrales definidos. Para configurarlo en SonarQube:</p>
+
+      <ol class="pasos">
+        <li>
+          <div>
+            <strong>Ir a Quality Gates en el portal</strong>
+            <p>Menú: <em>Quality Gates → Create</em> → Nombre: "Telefónica Gate"</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Configurar condiciones recomendadas para nuevo código:</strong>
+            <table style="margin-top:8px">
+              <tr>
+                <th>Métrica</th>
+                <th>Operador</th>
+                <th>Umbral</th>
+              </tr>
+              <tr>
+                <td>New Bugs</td>
+                <td>is greater than</td>
+                <td>0</td>
+              </tr>
+              <tr>
+                <td>New Vulnerabilities</td>
+                <td>is greater than</td>
+                <td>0</td>
+              </tr>
+              <tr>
+                <td>New Security Hotspots Reviewed</td>
+                <td>is less than</td>
+                <td>100%</td>
+              </tr>
+              <tr>
+                <td>New Code Smells</td>
+                <td>is greater than</td>
+                <td>10</td>
+              </tr>
+              <tr>
+                <td>New Duplicated Lines (%)</td>
+                <td>is greater than</td>
+                <td>3%</td>
+              </tr>
+            </table>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Asignar el Quality Gate al proyecto</strong>
+            <p>En el proyecto: <em>Project Settings → Quality Gate → Select "Telefónica Gate"</em></p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SECCIÓN 8: CI/CD
+       ══════════════════════════════════════════ -->
+  <div class="seccion">
+    <div class="seccion-header">
+      <div class="num">8</div>
+      <h2>Integración CI/CD</h2>
+    </div>
+
+    <p>Para integrar el análisis estático en un pipeline CI/CD (Jenkins, GitLab CI, GitHub Actions):</p>
+
+    <div class="subseccion">
+      <h3>🔄 GitHub Actions</h3>
+      <pre><code><span class="cm"># .github/workflows/static-analysis.yml</span>
+<span class="kw">name:</span> Static Analysis
+
+<span class="kw">on:</span>
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+<span class="kw">jobs:</span>
+  <span class="hl">analyze:</span>
+    runs-on: ubuntu-latest
+    steps:
+      - <span class="kw">uses:</span> actions/checkout@v4
+
+      - <span class="kw">name:</span> Set up JDK 21
+        <span class="kw">uses:</span> actions/setup-java@v4
+        <span class="kw">with:</span>
+          java-version: <span class="st">'21'</span>
+          distribution: <span class="st">'temurin'</span>
+
+      - <span class="kw">name:</span> Run Static Analysis
+        <span class="kw">run:</span> ./gradlew staticAnalysis
+
+      - <span class="kw">name:</span> SonarQube Analysis
+        <span class="kw">run:</span> ./gradlew sonarqube
+        <span class="kw">env:</span>
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - <span class="kw">name:</span> Upload Reports
+        <span class="kw">uses:</span> actions/upload-artifact@v4
+        <span class="kw">if:</span> always()
+        <span class="kw">with:</span>
+          name: static-analysis-reports
+          path: build/reports/</code></pre>
+    </div>
+
+    <div class="subseccion">
+      <h3>🏗️ Jenkins Pipeline</h3>
+      <pre><code><span class="cm">// Jenkinsfile</span>
+pipeline {
+    agent any
+    tools { jdk <span class="st">'JDK-21'</span> }
+
+    stages {
+        stage(<span class="st">'Checkout'</span>)  { steps { checkout scm } }
+
+        stage(<span class="st">'Static Analysis'</span>) {
+            steps {
+                sh <span class="st">'./gradlew staticAnalysis'</span>
+            }
+            post {
+                always {
+                    recordIssues tools: [checkStyle(pattern: <span class="st">'**/checkstyle/*.xml'</span>),
+                                         pmdParser(pattern: <span class="st">'**/pmd/*.xml'</span>),
+                                         spotBugs(pattern: <span class="st">'**/spotbugs/*.xml'</span>)]
+                }
+            }
+        }
+
+        stage(<span class="st">'SonarQube'</span>) {
+            steps {
+                withSonarQubeEnv(<span class="st">'SonarQube'</span>) {
+                    sh <span class="st">'./gradlew sonarqube'</span>
+                }
+            }
+        }
+
+        stage(<span class="st">'Quality Gate'</span>) {
+            steps {
+                timeout(time: <span class="nb">5</span>, unit: <span class="st">'MINUTES'</span>) {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+    }
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SECCIÓN 9: RESOLUCIÓN DE PROBLEMAS
+       ══════════════════════════════════════════ -->
+  <div class="seccion">
+    <div class="seccion-header">
+      <div class="num">9</div>
+      <h2>Resolución de Problemas</h2>
+    </div>
+
+    <table>
+      <tr>
+        <th>Problema</th>
+        <th>Causa</th>
+        <th>Solución</th>
+      </tr>
+      <tr>
+        <td><code>vm.max_map_count too low</code></td>
+        <td>SonarQube/ES necesita valor alto</td>
+        <td><code>wsl -d docker-desktop sysctl -w vm.max_map_count=262144</code></td>
+      </tr>
+      <tr>
+        <td>SonarQube no arranca (OOM)</td>
+        <td>Poca memoria asignada a Docker</td>
+        <td>Docker Desktop → Settings → Resources → Memory: mínimo 6 GB</td>
+      </tr>
+      <tr>
+        <td><code>Checkstyle: maxWarnings exceeded</code></td>
+        <td>Hay violations de estilo</td>
+        <td>Revisar <code>build/reports/checkstyle/main.html</code> y corregir</td>
+      </tr>
+      <tr>
+        <td><code>PMD build failed</code></td>
+        <td>Violaciones de reglas PMD</td>
+        <td>Revisar <code>build/reports/pmd/main.html</code>; ajustar código o ruleset</td>
+      </tr>
+      <tr>
+        <td>SpotBugs falla con StackOverflow</td>
+        <td>Análisis recursivo profundo</td>
+        <td>Añadir <code>-Xss2m</code> a <code>spotbugs.jvmArgs</code></td>
+      </tr>
+      <tr>
+        <td><code>401 Unauthorized</code> en Sonar</td>
+        <td>Token inválido o expirado</td>
+        <td>Regenerar token en <em>My Account → Security → Tokens</em></td>
+      </tr>
+      <tr>
+        <td>Puerto 9000 ocupado</td>
+        <td>Otro servicio usa el puerto</td>
+        <td>Cambiar en docker-compose: <code>"9001:9000"</code> y actualizar sonar-project.properties</td>
+      </tr>
+      <tr>
+        <td>Checkstyle falla en clases Lombok</td>
+        <td>Código generado detectado</td>
+        <td>Añadir entrada en <code>config/checkstyle/suppressions.xml</code></td>
+      </tr>
+    </table>
+
+    <div class="subseccion">
+      <h3>🔍 Comandos de Diagnóstico Útiles</h3>
+      <pre><code><span class="cm"># Estado de los contenedores Docker</span>
+docker compose ps
+
+<span class="cm"># Logs de SonarQube</span>
+docker compose logs --tail=50 sonarqube
+
+<span class="cm"># Reiniciar solo SonarQube</span>
+docker compose restart sonarqube
+
+<span class="cm"># Limpiar build y recompilar</span>
+.\gradlew.bat clean compileJava staticAnalysis
+
+<span class="cm"># Ejecutar solo checkstyle con más verbose</span>
+.\gradlew.bat checkstyleMain --info
+
+<span class="cm"># Ver árbol de dependencias de las tareas</span>
+.\gradlew.bat staticAnalysis --dry-run</code></pre>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SECCIÓN 10: REFERENCIA RÁPIDA
+       ══════════════════════════════════════════ -->
+  <div class="seccion">
+    <div class="seccion-header">
+      <div class="num">10</div>
+      <h2>Referencia Rápida</h2>
+    </div>
+
+    <div class="subseccion">
+      <h3>📁 Estructura de Archivos Creados</h3>
+      <pre><code>BrowserStack_ScreenPlay/
+├── build.gradle                           <span class="cm">✏️ modificado — plugins + config</span>
+├── gradle.properties                      <span class="cm">✏️ modificado — versiones herramientas</span>
+├── docker-compose.yml                     <span class="cm">✏️ modificado — servicios SonarQube</span>
+├── sonar-project.properties               <span class="cm">🆕 nuevo — config SonarQube</span>
+├── config/
+│   ├── checkstyle/
+│   │   ├── checkstyle.xml                 <span class="cm">🆕 nuevo — reglas de estilo</span>
+│   │   └── suppressions.xml               <span class="cm">🆕 nuevo — exclusiones Checkstyle</span>
+│   ├── pmd/
+│   │   └── ruleset.xml                    <span class="cm">🆕 nuevo — reglas PMD</span>
+│   └── spotbugs/
+│       └── exclude.xml                    <span class="cm">🆕 nuevo — filtro SpotBugs</span>
+└── docker/
+    └── sonar-init/
+        └── 01-init-sonarqube.sql          <span class="cm">🆕 nuevo — init DB SonarQube</span></code></pre>
+    </div>
+
+    <div class="subseccion">
+      <h3>⌨️ Comandos más Usados</h3>
+      <pre><code><span class="cm"># ── ANÁLISIS LOCAL (sin Docker) ───────────────────────────</span>
+.\gradlew.bat staticAnalysis              <span class="cm"># Todo el análisis estático</span>
+.\gradlew.bat checkstyleMain              <span class="cm"># Solo estilo</span>
+.\gradlew.bat pmdMain                     <span class="cm"># Solo PMD</span>
+.\gradlew.bat spotbugsMain                <span class="cm"># Solo SpotBugs</span>
+
+<span class="cm"># ── DOCKER ───────────────────────────────────────────────</span>
+docker compose up sonarqube-db sonarqube -d   <span class="cm"># Levantar SonarQube</span>
+docker compose down                           <span class="cm"># Parar todo</span>
+docker compose down -v                        <span class="cm"># Parar + borrar volúmenes</span>
+
+<span class="cm"># ── SONARQUBE ─────────────────────────────────────────────</span>
+.\gradlew.bat sonarqube -Dsonar.token=TOKEN   <span class="cm"># Enviar análisis</span>
+<span class="cm"># URL: http://localhost:9000</span>
+<span class="cm"># Credenciales iniciales: admin / admin</span>
+
+<span class="cm"># ── REPORTES ─────────────────────────────────────────────</span>
+start build\reports\checkstyle\main.html
+start build\reports\pmd\main.html
+start build\reports\spotbugs\main.html</code></pre>
+    </div>
+
+    <div class="subseccion">
+      <h3>🔗 Referencias y Documentación Oficial</h3>
+      <ul>
+        <li><strong>Checkstyle:</strong> checkstyle.sourceforge.io/checks.html</li>
+        <li><strong>PMD:</strong> pmd.github.io/pmd/pmd_rules_java.html</li>
+        <li><strong>SpotBugs:</strong> spotbugs.readthedocs.io</li>
+        <li><strong>SonarQube:</strong> docs.sonarsource.com/sonarqube</li>
+        <li><strong>Gradle Checkstyle Plugin:</strong> docs.gradle.org/current/userguide/checkstyle_plugin.html</li>
+        <li><strong>Gradle PMD Plugin:</strong> docs.gradle.org/current/userguide/pmd_plugin.html</li>
+        <li><strong>SpotBugs Gradle Plugin:</strong> github.com/spotbugs/spotbugs-gradle-plugin</li>
+        <li><strong>SonarQube Scanner for Gradle:</strong> github.com/SonarSource/sonar-scanner-gradle</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PIE DE PÁGINA -->
+  <div class="pie-pagina">
+    <p>
+      <strong>BrowserStack ScreenPlay — Gobierno de Automatización Telefónica</strong><br>
+      Generado: Marzo 2026 · Java 21 · Gradle 8.5 · Checkstyle 10.17 · PMD 7.5 · SpotBugs 4.8.6 · SonarQube 10.4
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

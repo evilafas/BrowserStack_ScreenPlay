@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<ruleset name="BrowserStack ScreenPlay - Reglas PMD"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0
+             https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>
+        Conjunto de reglas PMD adaptado al Gobierno de Automatización Telefónica.
+        Java 21 · Serenity BDD · Screenplay Pattern · Lombok · Cucumber BDD
+    </description>
+
+    <!-- ═══════════════════════════════════════════
+         BEST PRACTICES
+         ═══════════════════════════════════════════ -->
+    <rule ref="category/java/bestpractices.xml">
+        <!-- Excluir: el patrón Screenplay usa tipos abstractos intencionalmente -->
+        <exclude name="AbstractClassWithoutAbstractMethod"/>
+        <!-- Excluir: JUnit 4 usa @Test sin assert directamente (Serenity lo maneja) -->
+        <exclude name="JUnitTestContainsTooManyAsserts"/>
+        <exclude name="JUnitAssertionsShouldIncludeMessage"/>
+        <!-- Excluir: los campos public static final Target son el estándar del gobierno -->
+        <exclude name="AccessorClassGeneration"/>
+        <!-- Excluir: ArrayIsStoredDirectly no aplica para constructores de modelos simples -->
+        <exclude name="ArrayIsStoredDirectly"/>
+    </rule>
+
+    <!-- ═══════════════════════════════════════════
+         CODE STYLE
+         ═══════════════════════════════════════════ -->
+    <rule ref="category/java/codestyle.xml">
+        <!-- Excluir: lambdas y Screenplay requieren ciertos estilos de llamada -->
+        <exclude name="LongVariable"/>
+        <exclude name="ShortVariable"/>
+        <exclude name="ShortMethodName"/>
+        <!-- Excluir: no se requiere modifier final en todos los parámetros -->
+        <exclude name="MethodArgumentCouldBeFinal"/>
+        <exclude name="LocalVariableCouldBeFinal"/>
+        <!-- Excluir: Lombok genera código sin constructores explícitos -->
+        <exclude name="AtLeastOneConstructor"/>
+        <!-- Excluir: el patrón de importación estática es estándar en Serenity -->
+        <exclude name="TooManyStaticImports"/>
+        <!-- Excluir: nombres en español (gobierno Telefónica) -->
+        <exclude name="UnnecessaryFullyQualifiedName"/>
+        <exclude name="DefaultPackage"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <!-- Excluir: clase de utilidad con métodos estáticos es válida -->
+        <exclude name="UseUtilityClass"/>
+        <!-- Excluir: sobrenombre de variables en lambdas es necesario -->
+        <exclude name="LambdaCanBeMethodReference"/>
+    </rule>
+
+    <!-- ═══════════════════════════════════════════
+         DESIGN
+         ═══════════════════════════════════════════ -->
+    <rule ref="category/java/design.xml">
+        <!-- Excluir: el patrón Singleton es válido para HealeniumConfig -->
+        <exclude name="SingletonClassReturningNewInstance"/>
+        <!-- Excluir: complejidad en tareas de Screenplay puede ser necesaria -->
+        <exclude name="CyclomaticComplexity"/>
+        <exclude name="NPathComplexity"/>
+        <!-- Excluir: ciertas clases de configuración intencionalmente largas -->
+        <exclude name="TooManyMethods"/>
+        <exclude name="ExcessivePublicCount"/>
+        <exclude name="LawOfDemeter"/>
+    </rule>
+
+    <!-- ═══════════════════════════════════════════
+         ERROR PRONE
+         ═══════════════════════════════════════════ -->
+    <rule ref="category/java/errorprone.xml">
+        <!-- Excluir: Logger estático es válido con Lombok @Slf4j -->
+        <exclude name="ProperLogger"/>
+        <!-- Excluir: las excepciones de automatización heredan correctamente -->
+        <exclude name="MissingSerialVersionUID"/>
+        <!-- Excluir: null checks en frameworks de testing son comunes -->
+        <exclude name="NullAssignment"/>
+        <!-- Excluir: Serenity usa assertions propias -->
+        <exclude name="EmptyCatchBlock"/>
+    </rule>
+
+    <!-- ═══════════════════════════════════════════
+         PERFORMANCE
+         ═══════════════════════════════════════════ -->
+    <rule ref="category/java/performance.xml">
+        <!-- Excluir: StringBuilder en tests cortos no es crítico -->
+        <exclude name="InsufficientStringBufferDeclaration"/>
+        <exclude name="InefficientStringBuffering"/>
+    </rule>
+
+    <!-- ═══════════════════════════════════════════
+         SECURITY
+         ═══════════════════════════════════════════ -->
+    <rule ref="category/java/security.xml"/>
+
+    <!-- ═══════════════════════════════════════════
+         MULTITHREADING
+         ═══════════════════════════════════════════ -->
+    <rule ref="category/java/multithreading.xml">
+        <exclude name="DoNotUseThreads"/>
+        <exclude name="UseConcurrentHashMap"/>
+    </rule>
+
+    <!-- ═══════════════════════════════════════════
+         REGLAS PERSONALIZADAS ADICIONALES
+         ═══════════════════════════════════════════ -->
+
+    <!-- No usar printStackTrace() -->
+    <rule ref="category/java/errorprone.xml/AvoidPrintStackTrace"/>
+
+    <!-- No capturar Exception genérica -->
+    <rule ref="category/java/design.xml/AvoidCatchingGenericException"/>
+
+    <!-- No lanzar Exception genérica -->
+    <rule ref="category/java/design.xml/AvoidThrowingRawExceptionTypes"/>
+
+</ruleset>

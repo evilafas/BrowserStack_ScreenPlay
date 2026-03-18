@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<!--
+    Supresiones de Checkstyle para el proyecto BrowserStack ScreenPlay
+    Se suprimen falsos positivos en código de test y clases Lombok
+-->
+<suppressions>
+
+    <!-- Suprimir en toda la capa de test (step definitions, runners) -->
+    <suppress files="src[\\/]test[\\/].*" checks="MissingJavadocType"/>
+    <suppress files="src[\\/]test[\\/].*" checks="MissingJavadocMethod"/>
+    <suppress files="src[\\/]test[\\/].*" checks="DesignForExtension"/>
+
+    <!-- Runners de Cucumber: la anotación @CucumberOptions genera nombres largos -->
+    <suppress files=".*Runner\.java" checks="LineLength"/>
+
+    <!-- Page Objects (userInterfaces): constantes Target son largas por naturaleza -->
+    <suppress files=".*UI\.java" checks="LineLength"/>
+
+    <!-- Paquete userInterfaces: convención camelCase con I mayúscula establecida en el proyecto -->
+    <suppress files=".*userInterfaces.*" checks="PackageName"/>
+
+    <!-- Tasks de Screenplay: usan static star imports de sus Page Objects (convención Serenity) -->
+    <suppress files=".*tasks.*\.java" checks="AvoidStarImport"/>
+
+    <!-- Listeners de Healenium: código de infraestructura generado externamente -->
+    <suppress files="Healenium.*Listener\.java" checks="NeedBraces"/>
+    <suppress files="Healenium.*Listener\.java" checks="WhitespaceAround"/>
+
+    <!-- SimularCambioDOM: clase auxiliar de prueba -->
+    <suppress files="SimularCambioDOM\.java" checks=".*"/>
+
+    <!-- Variables locales que actúan como constantes en interacciones -->
+    <suppress files=".*interactions.*\.java" checks="LocalVariableName"/>
+
+    <!-- Excepciones personalizadas: constructores con super() son correctos -->
+    <suppress files=".*Exception\.java" checks="RedundantModifier"/>
+
+    <!-- Modelos de datos generados con Lombok (@Data, @Builder) -->
+    <suppress files=".*Data\.java" checks="MissingJavadocType"/>
+    <suppress files="UserData\.java" checks=".*"/>
+
+    <!-- Suprimir System.out solo en scripts de debugging y checks de salud -->
+    <suppress files="HealeniumHealthCheck\.java" checks="Regexp"/>
+    <suppress files="HealingQualityGate\.java" checks="Regexp"/>
+    <suppress files="HealeniumLogger\.java" checks="Regexp"/>
+
+</suppressions>

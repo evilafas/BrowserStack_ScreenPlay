@@ -1,4 +1,9 @@
 services:
+
+  # ═══════════════════════════════════════════════════════════
+  # HEALENIUM — Self-Healing para Selenium
+  # ═══════════════════════════════════════════════════════════
+
   healenium-db:
     image: postgres:14-alpine
     container_name: healenium-db
@@ -43,3 +48,81 @@ services:
       HLM_IMITATOR_PORT: 8000
     ports:
       - "7878:7878"
+
+  # ═══════════════════════════════════════════════════════════
+  # SONARQUBE — Plataforma de Calidad de Código (Análisis Estático)
+  # ═══════════════════════════════════════════════════════════
+
+  sonarqube-db:
+    image: postgres:14-alpine
+    container_name: sonarqube-db
+    environment:
+      POSTGRES_DB: sonarqube
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar_pass
+    volumes:
+      - sonarqube_db_data:/var/lib/postgresql/data
+      - ./docker/sonar-init:/docker-entrypoint-initdb.d
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonar -d sonarqube"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sonar-net
+
+  sonarqube:
+    image: sonarqube:10.4-community
+    container_name: sonarqube
+    depends_on:
+      sonarqube-db:
+        condition: service_healthy
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/sonarqube
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar_pass
+      SONAR_WEB_PORT: 9000
+      # Incrementar memoria para análisis de proyectos grandes
+      SONAR_CE_JAVAOPTS: "-Xmx1g -Xms256m"
+      SONAR_WEB_JAVAOPTS: "-Xmx512m -Xms128m"
+      SONAR_SEARCH_JAVAOPTS: "-Xmx512m -Xms512m"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    ports:
+      - "9000:9000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/api/system/status | grep -q '\"status\":\"UP\"'"]
+      interval: 30s
+      timeout: 10s
+      retries: 15
+      start_period: 120s
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    networks:
+      - sonar-net
+
+# ═══════════════════════════════════════════════════════════
+# VOLÚMENES — Persistencia de datos SonarQube
+# ═══════════════════════════════════════════════════════════
+volumes:
+  sonarqube_db_data:
+    driver: local
+  sonarqube_data:
+    driver: local
+  sonarqube_extensions:
+    driver: local
+  sonarqube_logs:
+    driver: local
+
+# ═══════════════════════════════════════════════════════════
+# REDES
+# ═══════════════════════════════════════════════════════════
+networks:
+  sonar-net:
+    driver: bridge
